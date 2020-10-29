@@ -29,5 +29,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
-          name: verifypn-linux64
-          path: build/bin/verifypn-linux64
+          name: Test Results
+          path: output.txt
