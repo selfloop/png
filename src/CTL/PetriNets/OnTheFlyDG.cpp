@@ -5,6 +5,7 @@
 #include <iostream>
 #include <queue>
 #include <limits>
+#include <utility>
 
 #include "PetriEngine/SuccessorGenerator.h"
 #include "PetriEngine/PQL/Expressions.h"
@@ -14,6 +15,7 @@ using namespace PetriEngine::PQL;
 using namespace DependencyGraph;
 
 namespace PetriNets {
+  static void (*const noop)() = []() {};
 
   OnTheFlyDG::OnTheFlyDG(PetriEngine::PetriNet *t_net, bool partial_order)
       : encoder(t_net->numberOfPlaces(), 0),
@@ -63,346 +65,33 @@ namespace PetriNets {
           }
       } else if (query_type == LOPERATOR) {
           if (v->query->getQuantifier() == NEG) {
-              // no need to try to evaluate here -- this is already transient in other evaluations.
-              auto cond = dynamic_cast<NotCondition *>(v->query);
-              Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[0]);
-              Edge *e = newEdge(*v, /*v->query->distance(context)*/0);
-              e->is_negated = true;
-              e->addTarget(c);
-              succs.push_back(e);
+              addSuccessorsForNegation(v, succs);
           } else if (v->query->getQuantifier() == AND) {
-              auto cond = dynamic_cast<AndCondition *>(v->query);
-              //Check if left is false
-              std::vector<Condition *> conds;
-              for (auto &c : *cond) {
-                  auto res = fastEval(c.get(), &query_marking);
-                  if (res == Condition::RFALSE) {
-                      return succs;
-                  }
-                  if (res == Condition::RUNKNOWN) {
-                      conds.push_back(c.get());
-                  }
-              }
-
-              Edge *e = newEdge(*v, 0);
-
-              //If we get here, then either both propositions are true (shouldn't be possible)
-              //Or a temporal operator and a true proposition
-              //Or both are temporal
-              for (auto c : conds) {
-                  assert(c->isTemporal());
-                  e->addTarget(createConfiguration(v->marking, v->owner, c));
-              }
-              succs.push_back(e);
+              addSuccessorsForConjunction(v, succs);
           } else if (v->query->getQuantifier() == OR) {
-              auto cond = dynamic_cast<OrCondition *>(v->query);
-              //Check if left is true
-              std::vector<Condition *> conds;
-              for (auto &c : *cond) {
-                  auto res = fastEval(c.get(), &query_marking);
-                  if (res == Condition::RTRUE) {
-                      succs.push_back(newEdge(*v, 0));
-                      return succs;
-                  }
-                  if (res == Condition::RUNKNOWN) {
-                      conds.push_back(c.get());
-                  }
-              }
-
-              //If we get here, either both propositions are false
-              //Or one is false and one is temporal
-              //Or both temporal
-              for (auto c : conds) {
-                  assert(c->isTemporal());
-                  Edge *e = newEdge(*v, /*cond->distance(context)*/0);
-                  e->addTarget(createConfiguration(v->marking, v->owner, c));
-                  succs.push_back(e);
-              }
+              addSuccessorsForDisjunction(v, succs);
           } else {
               assert(false && "An unknown error occurred in the loperator-part of the successor generator");
           }
       } else if (query_type == PATHQEURY) {
           if (v->query->getQuantifier() == A) {
               if (v->query->getPath() == U) {
-                  auto cond = dynamic_cast<AUCondition *>(v->query);
-                  Edge *right = nullptr;
-                  auto r1 = fastEval((*cond)[1], &query_marking);
-                  if (r1 != Condition::RUNKNOWN) {
-                      //right side is not temporal, eval it right now!
-                      if (r1 == Condition::RTRUE) {    //satisfied, no need to go through successors
-                          succs.push_back(newEdge(*v, 0));
-                          return succs;
-                      }//else: It's not valid, no need to add any edge, just add successors
-                  } else {
-                      //right side is temporal, we need to evaluate it as normal
-                      Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[1]);
-                      right = newEdge(*v, /*(*cond)[1]->distance(context)*/0);
-                      right->addTarget(c);
-                  }
-                  bool valid = false;
-                  Configuration *left = nullptr;
-                  auto r0 = fastEval((*cond)[0], &query_marking);
-                  if (r0 != Condition::RUNKNOWN) {
-                      //left side is not temporal, eval it right now!
-                      valid = r0 == Condition::RTRUE;
-                  } else {
-                      //left side is temporal, include it in the edge
-                      left = createConfiguration(v->marking, v->owner, (*cond)[0]);
-                  }
-                  if (valid || left != nullptr) {
-                      //if left side is guaranteed to be not satisfied, skip successor generation
-                      Edge *leftEdge = nullptr;
-                      nextStates(query_marking, cond,
-                                 [&]() { leftEdge = newEdge(*v, std::numeric_limits<uint32_t>::max()); },
-                                 [&](Marking &mark) {
-                                   auto res = fastEval(cond, &mark);
-                                   if (res == Condition::RTRUE) return true;
-                                   if (res == Condition::RFALSE) {
-                                       left = nullptr;
-                                       leftEdge->targets.clear();
-                                       leftEdge = nullptr;
-                                       return false;
-                                   }
-                                   context.setMarking(mark.marking());
-                                   leftEdge->weight = 0;//std::min(leftEdge->weight, /*cond->distance(context)*/0);
-                                   Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
-                                   leftEdge->addTarget(c);
-                                   return true;
-                                 },
-                                 [&]() {
-                                   if (leftEdge) {
-                                       if (left != nullptr) {
-                                           leftEdge->addTarget(left);
-                                       }
-                                       succs.push_back(leftEdge);
-                                   }
-                                 }
-                      );
-                  } //else: Left side is not temporal and it's false, no way to succeed there...
-
-                  if (right != nullptr) {
-                      succs.push_back(right);
-                  }
+                  addSuccessorsForAU(context, v, succs);
               } else if (v->query->getPath() == F) {
-                  auto cond = dynamic_cast<AFCondition *>(v->query);
-                  Edge *subquery = nullptr;
-                  auto r = fastEval((*cond)[0], &query_marking);
-                  if (r != Condition::RUNKNOWN) {
-                      bool valid = r == Condition::RTRUE;
-                      if (valid) {
-                          succs.push_back(newEdge(*v, 0));
-                          return succs;
-                      }
-                  } else {
-                      subquery = newEdge(*v, /*cond->distance(context)*/0);
-                      Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[0]);
-                      subquery->addTarget(c);
-                  }
-                  Edge *e1 = nullptr;
-                  nextStates(query_marking, cond,
-                             [&]() { e1 = newEdge(*v, std::numeric_limits<uint32_t>::max()); },
-                             [&](Marking &mark) {
-                               auto res = fastEval(cond, &mark);
-                               if (res == Condition::RTRUE) return true;
-                               if (res == Condition::RFALSE) {
-                                   if (subquery) {
-                                       --subquery->refcnt;
-                                       release(subquery);
-                                       subquery = nullptr;
-                                   }
-                                   e1->targets.clear();
-                                   return false;
-                               }
-                               context.setMarking(mark.marking());
-                               e1->weight = 0;//std::min(e1->weight, /*cond->distance(context)*/0);
-                               Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
-                               e1->addTarget(c);
-                               return true;
-                             },
-                             [&]() {
-                               succs.push_back(e1);
-                             }
-                  );
-
-                  if (subquery != nullptr) {
-                      succs.push_back(subquery);
-                  }
+                  addSuccessorsForAF(context, v, succs);
               } else if (v->query->getPath() == X) {
-                  auto cond = dynamic_cast<AXCondition *>(v->query);
-                  Edge *e = newEdge(*v, std::numeric_limits<uint32_t>::max());
-                  Condition::Result allValid = Condition::RTRUE;
-                  nextStates(query_marking, cond,
-                             []() {},
-                             [&](Marking &mark) {
-                               auto res = fastEval((*cond)[0], &mark);
-                               if (res != Condition::RUNKNOWN) {
-                                   if (res == Condition::RFALSE) {
-                                       allValid = Condition::RFALSE;
-                                       return false;
-                                   }
-                               } else {
-                                   allValid = Condition::RUNKNOWN;
-                                   context.setMarking(mark.marking());
-                                   e->weight = 0;//std::min(e->weight, /*cond->distance(context)*/0);
-                                   Configuration *c = createConfiguration(createMarking(mark), v->owner, (*cond)[0]);
-                                   e->addTarget(c);
-                               }
-                               return true;
-                             },
-                             []() {}
-                  );
-                  if (allValid == Condition::RUNKNOWN) {
-                      succs.push_back(e);
-                  } else if (allValid == Condition::RTRUE) {
-                      e->targets.clear();
-                      succs.push_back(e);
-                  } else {
-                  }
+                  addSuccessorsForAX(context, v, succs);
               } else if (v->query->getPath() == G) {
                   assert(false && "Path operator G had not been translated - Parse error detected in succ()");
               } else
                   assert(false && "An unknown error occoured in the successor generator");
           } else if (v->query->getQuantifier() == E) {
               if (v->query->getPath() == U) {
-                  auto cond = dynamic_cast<EUCondition *>(v->query);
-                  Edge *right = nullptr;
-                  auto r1 = fastEval((*cond)[1], &query_marking);
-                  if (r1 == Condition::RUNKNOWN) {
-                      Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[1]);
-                      right = newEdge(*v, /*(*cond)[1]->distance(context)*/0);
-                      right->addTarget(c);
-                  } else {
-                      bool valid = r1 == Condition::RTRUE;
-                      if (valid) {
-                          succs.push_back(newEdge(*v, 0));
-                          return succs;
-                      }   // else: right condition is not satisfied, no need to add an edge
-                  }
-
-                  Configuration *left = nullptr;
-                  bool valid = false;
-                  nextStates(query_marking, cond,
-                             [&]() {
-                               auto r0 = fastEval((*cond)[0], &query_marking);
-                               if (r0 == Condition::RUNKNOWN) {
-                                   left = createConfiguration(v->marking, v->owner, (*cond)[0]);
-                               } else {
-                                   valid = r0 == Condition::RTRUE;
-                               }
-                             },
-                             [&](Marking &marking) {
-                               if (left == nullptr && !valid) return false;
-                               auto res = fastEval(cond, &marking);
-                               if (res == Condition::RFALSE) return true;
-                               if (res == Condition::RTRUE) {
-                                   for (auto s : succs) {
-                                       --s->refcnt;
-                                       release(s);
-                                   }
-                                   succs.clear();
-                                   succs.push_back(newEdge(*v, 0));
-                                   if (right) {
-                                       --right->refcnt;
-                                       release(right);
-                                       right = nullptr;
-                                   }
-
-                                   if (left) {
-                                       succs.back()->addTarget(left);
-                                   }
-
-                                   return false;
-                               }
-                               context.setMarking(marking.marking());
-                               Edge *e = newEdge(*v, /*cond->distance(context)*/0);
-                               Configuration
-                                   *c1 = createConfiguration(createMarking(marking), owner(marking, cond), cond);
-                               e->addTarget(c1);
-                               if (left != nullptr) {
-                                   e->addTarget(left);
-                               }
-                               succs.push_back(e);
-                               return true;
-                             }, []() {});
-
-                  if (right != nullptr) {
-                      succs.push_back(right);
-                  }
+                  addSuccessorsForEU(context, v, succs);
               } else if (v->query->getPath() == F) {
-                  auto cond = dynamic_cast<EFCondition *>(v->query);
-                  Edge *subquery = nullptr;
-                  auto r = fastEval((*cond)[0], &query_marking);
-                  if (r != Condition::RUNKNOWN) {
-                      bool valid = r == Condition::RTRUE;
-                      if (valid) {
-                          succs.push_back(newEdge(*v, 0));
-                          return succs;
-                      }
-                  } else {
-                      Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[0]);
-                      subquery = newEdge(*v, /*cond->distance(context)*/0);
-                      subquery->addTarget(c);
-                  }
-
-                  nextStates(query_marking, cond,
-                             []() {},
-                             [&](Marking &mark) {
-                               auto res = fastEval(cond, &mark);
-                               if (res == Condition::RFALSE) return true;
-                               if (res == Condition::RTRUE) {
-                                   for (auto s : succs) {
-                                       --s->refcnt;
-                                       release(s);
-                                   }
-                                   succs.clear();
-                                   succs.push_back(newEdge(*v, 0));
-                                   if (subquery) {
-                                       --subquery->refcnt;
-                                       release(subquery);
-                                   }
-                                   subquery = nullptr;
-                                   return false;
-                               }
-                               context.setMarking(mark.marking());
-                               Edge *e = newEdge(*v, /*cond->distance(context)*/0);
-                               Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
-                               e->addTarget(c);
-                               succs.push_back(e);
-                               return true;
-                             },
-                             []() {}
-                  );
-
-                  if (subquery != nullptr) {
-                      succs.push_back(subquery);
-                  }
+                  addSuccessorsForEF(context, v, succs);
               } else if (v->query->getPath() == X) {
-                  auto cond = dynamic_cast<EXCondition *>(v->query);
-                  auto query = (*cond)[0];
-                  nextStates(query_marking, cond,
-                             []() {},
-                             [&](Marking &marking) {
-                               auto res = fastEval(query, &marking);
-                               if (res == Condition::RTRUE) {
-                                   for (auto s : succs) {
-                                       --s->refcnt;
-                                       release(s);
-                                   }
-                                   succs.clear();
-                                   succs.push_back(newEdge(*v, 0));
-                                   return false;
-                               }   //else: It can't hold there, no need to create an edge
-                               else if (res == Condition::RUNKNOWN) {
-                                   context.setMarking(marking.marking());
-                                   Edge *e = newEdge(*v, /*(*cond)[0]->distance(context)*/0);
-                                   Configuration *c = createConfiguration(createMarking(marking), v->owner, query);
-                                   e->addTarget(c);
-                                   succs.push_back(e);
-                               }
-                               return true;
-                             },
-                             []() {}
-                  );
+                  addSuccessorsForEX(context, v, succs);
               } else if (v->query->getPath() == G) {
                   assert(false && "Path operator G had not been translated - Parse error detected in succ()");
               } else
@@ -427,10 +116,11 @@ namespace PetriNets {
       return initial_config;
   }
 
-  void OnTheFlyDG::nextStates(Marking &t_marking, Condition *ptr,
+  void OnTheFlyDG::nextStates(Marking &t_marking,
+                              Condition *ptr,
                               std::function<void()> pre,
                               std::function<bool(Marking &)> foreach,
-                              std::function<void()> post) {
+                              const std::function<void()> &post) {
       bool first = true;
       memcpy(working_marking.marking(), query_marking.marking(), n_places * sizeof(PetriEngine::MarkVal));
       auto qf = dynamic_cast<QuantifierCondition *>(ptr);
@@ -558,4 +248,369 @@ namespace PetriNets {
       }
   }
 
+  void OnTheFlyDG::addSuccessorsForNegation(PetriConfig *v, vector<Edge *> &succs) {
+      // no need to try to evaluate here -- this is already transient in other evaluations.
+      auto cond = dynamic_cast<NotCondition *>(v->query);
+      Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[0]);
+      Edge *e = newEdge(*v, /*v->query->distance(context)*/0);
+      e->is_negated = true;
+      e->addTarget(c);
+      succs.push_back(e);
+  }
+
+  void OnTheFlyDG::addSuccessorsForConjunction(PetriConfig *v, vector<Edge *> &succs) {
+      auto cond = dynamic_cast<AndCondition *>(v->query);
+      // Check if left is false
+      vector<Condition *> conds;
+
+      if (fastEvalConjunctionConditions(cond, conds)) return;
+
+      Edge *e = newEdge(*v, 0);
+
+      //If we get here, then either both propositions are true (shouldn't be possible)
+      //Or a temporal operator and a true proposition
+      //Or both are temporal
+      for (auto c : conds) {
+          assert(c->isTemporal());
+          e->addTarget(createConfiguration(v->marking, v->owner, c));
+      }
+      succs.push_back(e);
+  }
+
+  void OnTheFlyDG::addSuccessorsForDisjunction(PetriConfig *v, vector<Edge *> &succs) {
+      auto cond = dynamic_cast<OrCondition *>(v->query);
+      //Check if left is true
+      vector<Condition *> conds;
+
+      if (fastEvalDisjunctionConditions(cond, conds)) {
+          succs.push_back(newEdge(*v, 0));
+          return;
+      }
+
+      //If we get here, either both propositions are false
+      //Or one is false and one is temporal
+      //Or both temporal
+      for (auto c : conds) {
+          assert(c->isTemporal());
+          Edge *e = newEdge(*v, /*cond->distance(context)*/0);
+          e->addTarget(createConfiguration(v->marking, v->owner, c));
+          succs.push_back(e);
+      }
+  }
+
+  void OnTheFlyDG::addSuccessorsForAX(DistanceContext &context, PetriConfig *v, vector<Edge *> &succs) {
+      auto cond = dynamic_cast<AXCondition *>(v->query);
+      Edge *e = newEdge(*v, numeric_limits<uint32_t>::max());
+      Condition::Result allValid = Condition::RTRUE;
+      nextStates(query_marking, cond,
+                 noop,
+                 [&](Marking &mark) {
+                   auto res = fastEval((*cond)[0], &mark);
+                   if (res != Condition::RUNKNOWN) {
+                       if (res == Condition::RFALSE) {
+                           allValid = Condition::RFALSE;
+                           return false;
+                       }
+                   } else {
+                       allValid = Condition::RUNKNOWN;
+                       context.setMarking(mark.marking());
+                       e->weight = 0;//std::min(e->weight, /*cond->distance(context)*/0);
+                       Configuration *c = createConfiguration(createMarking(mark), v->owner, (*cond)[0]);
+                       e->addTarget(c);
+                   }
+                   return true;
+                 },
+                 noop
+      );
+      if (allValid == Condition::RUNKNOWN) {
+          succs.push_back(e);
+      } else if (allValid == Condition::RTRUE) {
+          e->targets.clear();
+          succs.push_back(e);
+      }
+  }
+
+  void OnTheFlyDG::addSuccessorsForAU(DistanceContext &context, PetriConfig *v, vector<Edge *> &succs) {
+      auto cond = dynamic_cast<AUCondition *>(v->query);
+      Edge *right = nullptr;
+      auto r1 = fastEval((*cond)[1], &query_marking);
+      if (r1 != Condition::RUNKNOWN) {
+          //right side is not temporal, eval it right now!
+          if (r1 == Condition::RTRUE) {    //satisfied, no need to go through successors
+              succs.push_back(newEdge(*v, 0));
+              return;
+          } //else: It's not valid, no need to add any edge, just add successors
+      } else {
+          //right side is temporal, we need to evaluate it as normal
+          Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[1]);
+          right = newEdge(*v, /*(*cond)[1]->distance(context)*/0);
+          right->addTarget(c);
+      }
+      bool valid = false;
+      Configuration *left = nullptr;
+      auto r0 = fastEval((*cond)[0], &query_marking);
+      if (r0 != Condition::RUNKNOWN) {
+          //left side is not temporal, eval it right now!
+          valid = r0 == Condition::RTRUE;
+      } else {
+          //left side is temporal, include it in the edge
+          left = createConfiguration(v->marking, v->owner, (*cond)[0]);
+      }
+      if (valid || left != nullptr) {
+          //if left side is guaranteed to be not satisfied, skip successor generation
+          Edge *leftEdge = nullptr;
+          nextStates(query_marking, cond,
+                     [&]() { leftEdge = newEdge(*v, numeric_limits<uint32_t>::max()); },
+                     [&](Marking &mark) {
+                       auto res = fastEval(cond, &mark);
+                       if (res == Condition::RTRUE) return true;
+                       if (res == Condition::RFALSE) {
+                           left = nullptr;
+                           leftEdge->targets.clear();
+                           leftEdge = nullptr;
+                           return false;
+                       }
+                       context.setMarking(mark.marking());
+                       leftEdge->weight = 0;//std::min(leftEdge->weight, /*cond->distance(context)*/0);
+                       Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
+                       leftEdge->addTarget(c);
+                       return true;
+                     },
+                     [&]() {
+                       if (leftEdge) {
+                           if (left != nullptr) {
+                               leftEdge->addTarget(left);
+                           }
+                           succs.push_back(leftEdge);
+                       }
+                     }
+          );
+      } //else: Left side is not temporal and it's false, no way to succeed there...
+
+      if (right != nullptr) {
+          succs.push_back(right);
+      }
+  }
+
+  void OnTheFlyDG::addSuccessorsForAF(DistanceContext &context, PetriConfig *v, vector<Edge *> &succs) {
+      auto cond = dynamic_cast<AFCondition *>(v->query);
+      Edge *subquery = nullptr;
+      auto r = fastEval((*cond)[0], &query_marking);
+      if (r != Condition::RUNKNOWN) {
+          bool valid = r == Condition::RTRUE;
+          if (valid) {
+              succs.push_back(newEdge(*v, 0));
+              return;
+          }
+      } else {
+          subquery = newEdge(*v, /*cond->distance(context)*/0);
+          Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[0]);
+          subquery->addTarget(c);
+      }
+      Edge *e1 = nullptr;
+      nextStates(query_marking, cond,
+                 [&]() { e1 = newEdge(*v, numeric_limits<uint32_t>::max()); },
+                 [&](Marking &mark) {
+                   auto res = fastEval(cond, &mark);
+                   if (res == Condition::RTRUE) return true;
+                   if (res == Condition::RFALSE) {
+                       if (subquery) {
+                           --subquery->refcnt;
+                           release(subquery);
+                           subquery = nullptr;
+                       }
+                       e1->targets.clear();
+                       return false;
+                   }
+                   context.setMarking(mark.marking());
+                   e1->weight = 0;//std::min(e1->weight, /*cond->distance(context)*/0);
+                   Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
+                   e1->addTarget(c);
+                   return true;
+                 },
+                 [&]() {
+                   succs.push_back(e1);
+                 }
+      );
+
+      if (subquery != nullptr) {
+          succs.push_back(subquery);
+      }
+  }
+
+  void OnTheFlyDG::addSuccessorsForEU(DistanceContext &context, PetriConfig *v, vector<Edge *> &succs) {
+      auto cond = dynamic_cast<EUCondition *>(v->query);
+      Edge *right = nullptr;
+      auto r1 = fastEval((*cond)[1], &query_marking);
+      if (r1 == Condition::RUNKNOWN) {
+          Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[1]);
+          right = newEdge(*v, /*(*cond)[1]->distance(context)*/0);
+          right->addTarget(c);
+      } else {
+          bool valid = r1 == Condition::RTRUE;
+          if (valid) {
+              succs.push_back(newEdge(*v, 0));
+              return;
+          }   // else: right condition is not satisfied, no need to add an edge
+      }
+
+      Configuration *left = nullptr;
+      bool valid = false;
+      nextStates(query_marking, cond,
+                 [&]() {
+                   auto r0 = fastEval((*cond)[0], &query_marking);
+                   if (r0 == Condition::RUNKNOWN) {
+                       left = createConfiguration(v->marking, v->owner, (*cond)[0]);
+                   } else {
+                       valid = r0 == Condition::RTRUE;
+                   }
+                 },
+                 [&](Marking &marking) {
+                   if (left == nullptr && !valid) return false;
+                   auto res = fastEval(cond, &marking);
+                   if (res == Condition::RFALSE) return true;
+                   if (res == Condition::RTRUE) {
+                       for (auto s : succs) {
+                           --s->refcnt;
+                           release(s);
+                       }
+                       succs.clear();
+                       succs.push_back(newEdge(*v, 0));
+                       if (right) {
+                           --right->refcnt;
+                           release(right);
+                           right = nullptr;
+                       }
+
+                       if (left) {
+                           succs.back()->addTarget(left);
+                       }
+
+                       return false;
+                   }
+                   context.setMarking(marking.marking());
+                   Edge *e = newEdge(*v, /*cond->distance(context)*/0);
+                   Configuration
+                       *c1 = createConfiguration(createMarking(marking), owner(marking, cond), cond);
+                   e->addTarget(c1);
+                   if (left != nullptr) {
+                       e->addTarget(left);
+                   }
+                   succs.push_back(e);
+                   return true;
+                 }, noop);
+
+      if (right != nullptr) {
+          succs.push_back(right);
+      }
+  }
+
+  void OnTheFlyDG::addSuccessorsForEF(DistanceContext &context, PetriConfig *v, vector<Edge *> &succs) {
+      auto cond = dynamic_cast<EFCondition *>(v->query);
+      Edge *subquery = nullptr;
+      auto r = fastEval((*cond)[0], &query_marking);
+      if (r != Condition::RUNKNOWN) {
+          bool valid = r == Condition::RTRUE;
+          if (valid) {
+              succs.push_back(newEdge(*v, 0));
+              return;
+          }
+      } else {
+          Configuration *c = createConfiguration(v->marking, v->owner, (*cond)[0]);
+          subquery = newEdge(*v, /*cond->distance(context)*/0);
+          subquery->addTarget(c);
+      }
+
+      nextStates(query_marking, cond,
+                 noop,
+                 [&](Marking &mark) {
+                   auto res = fastEval(cond, &mark);
+                   if (res == Condition::RFALSE) return true;
+                   if (res == Condition::RTRUE) {
+                       for (auto s : succs) {
+                           --s->refcnt;
+                           release(s);
+                       }
+                       succs.clear();
+                       succs.push_back(newEdge(*v, 0));
+                       if (subquery) {
+                           --subquery->refcnt;
+                           release(subquery);
+                       }
+                       subquery = nullptr;
+                       return false;
+                   }
+                   context.setMarking(mark.marking());
+                   Edge *e = newEdge(*v, /*cond->distance(context)*/0);
+                   Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
+                   e->addTarget(c);
+                   succs.push_back(e);
+                   return true;
+                 },
+                 noop
+      );
+
+      if (subquery != nullptr) {
+          succs.push_back(subquery);
+      }
+  }
+
+  void OnTheFlyDG::addSuccessorsForEX(DistanceContext &context, PetriConfig *v, vector<Edge *> &succs) {
+      auto cond = dynamic_cast<EXCondition *>(v->query);
+      auto query = (*cond)[0];
+      nextStates(query_marking, cond,
+                 noop,
+                 [&](Marking &marking) {
+                   auto res = fastEval(query, &marking);
+                   if (res == Condition::RTRUE) {
+                       for (auto s : succs) {
+                           --s->refcnt;
+                           release(s);
+                       }
+                       succs.clear();
+                       succs.push_back(newEdge(*v, 0));
+                       return false;
+                   }   //else: It can't hold there, no need to create an edge
+                   else if (res == Condition::RUNKNOWN) {
+                       context.setMarking(marking.marking());
+                       Edge *e = newEdge(*v, /*(*cond)[0]->distance(context)*/0);
+                       Configuration *c = createConfiguration(createMarking(marking), v->owner, query);
+                       e->addTarget(c);
+                       succs.push_back(e);
+                   }
+                   return true;
+                 },
+                 noop
+      );
+  }
+
+  bool OnTheFlyDG::fastEvalDisjunctionConditions(
+      PetriEngine::PQL::OrCondition *condition,
+      vector<Condition *> &evaluatedConditions
+  ) {
+      return shortCircuitFastEvalConditions(Condition::RTRUE, condition, evaluatedConditions);
+  }
+
+  bool OnTheFlyDG::fastEvalConjunctionConditions(
+      PetriEngine::PQL::AndCondition *condition,
+      vector<Condition *> &evaluatedConditions
+  ) {
+      return shortCircuitFastEvalConditions(Condition::RFALSE, condition, evaluatedConditions);
+  }
+
+  bool OnTheFlyDG::shortCircuitFastEvalConditions(
+      Condition::Result shortCircuitCondition,
+      PetriEngine::PQL::LogicalCondition *condition,
+      vector<Condition *> &evaluatedConditions
+  ) {
+      for (auto &c : *condition) {
+          auto res = fastEval(c.get(), &query_marking);
+          if (res == shortCircuitCondition) {
+              return true;
+          } else if (res == Condition::RUNKNOWN) {
+              evaluatedConditions.push_back(c.get());
+          }
+      }
+      return false;
+  }
 }//PetriNet
