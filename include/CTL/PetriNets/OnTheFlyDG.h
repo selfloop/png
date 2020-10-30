@@ -27,7 +27,7 @@ public:
     virtual ~OnTheFlyDG();
 
     //Dependency graph interface
-    virtual std::vector<DependencyGraph::Edge*> successors(DependencyGraph::Configuration *c) override;
+    virtual std::vector<DependencyGraph::Edge*> successors(DependencyGraph::Configuration *conf) override;
     virtual DependencyGraph::Configuration *initialConfiguration() override;
     virtual void cleanUp() override;
     void setQuery(const Condition_ptr& query);
@@ -62,7 +62,7 @@ protected:
     //used after query is set
     Condition_ptr query = nullptr;
 
-    Condition::Result fastEval(Condition* query, Marking* unfolded);
+    Condition::Result fastEval(Condition* condition, Marking* unfolded);
     Condition::Result fastEval(const Condition_ptr& query, Marking* unfolded)
     {
         return fastEval(query.get(), unfolded);
