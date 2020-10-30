@@ -21,11 +21,11 @@
 namespace PetriEngine {
 class SuccessorGenerator {
 public:
-    SuccessorGenerator(const PetriNet& net);
+    SuccessorGenerator(const PetriNet& net, bool is_game = false);
     SuccessorGenerator(const PetriNet& net, std::vector<std::shared_ptr<PQL::Condition> >& queries);
     virtual ~SuccessorGenerator();
     void prepare(const Structures::State* state);
-    bool next(Structures::State& write);
+    bool next(Structures::State& write,  PetriNet::player_t player = PetriNet::ANY);
     uint32_t fired()
     {
         return _suc_tcounter -1;
@@ -65,6 +65,7 @@ private:
     const Structures::State* _parent;
     uint32_t _suc_pcounter;
     uint32_t _suc_tcounter;
+    bool _is_game = false;
 
     friend class ReducingSuccessorGenerator;
 };

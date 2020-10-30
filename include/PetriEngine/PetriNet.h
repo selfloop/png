@@ -59,6 +59,8 @@ namespace PetriEngine {
     class PetriNet {
         PetriNet(uint32_t transitions, uint32_t invariants, uint32_t places);
     public:
+	typedef uint8_t player_t;
+
         ~PetriNet();
 
         uint32_t initial(size_t id) const;
@@ -68,6 +70,8 @@ namespace PetriEngine {
         bool fireable(const MarkVal* marking, int transitionIndex);
         std::pair<const Invariant*, const Invariant*> preset(uint32_t id) const;
         std::pair<const Invariant*, const Invariant*> postset(uint32_t id) const;
+        bool ownedBy(uint32_t t, player_t p) const;
+        player_t owner(uint32_t t) const { return _players[t]; }
         uint32_t numberOfTransitions() const {
             return _ntransitions;
         }
@@ -103,6 +107,11 @@ namespace PetriEngine {
         void sort();
         
         void toXML(std::ostream& out);
+    
+        static constexpr player_t NONE = 0;
+        static constexpr player_t CTRL = 1;
+        static constexpr player_t ENV = 2;
+        static constexpr player_t ANY = CTRL | ENV;
         
         const MarkVal* initial() const {
             return _initialMarking;
@@ -116,6 +125,8 @@ namespace PetriEngine {
          */
         uint32_t _ninvariants, _ntransitions, _nplaces;
 
+        // transitions to players. To avoid overhead during normal verification.
+        std::vector<uint8_t> _players; // bool for now (ctrl==1, unctrl=2)
         std::vector<TransPtr> _transitions;
         std::vector<Invariant> _invariants;
         std::vector<uint32_t> _placeToPtrs;

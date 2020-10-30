@@ -69,9 +69,9 @@ void PNMLParser::parse(ifstream& xml,
     //Add all the transition
     for (auto & transition : transitions)
         if (!isColored) {
-            builder->addTransition(transition.id, transition.x, transition.y);
+            builder->addTransition(transition.id, transition.player, transition.x, transition.y);
         } else {
-            builder->addTransition(transition.id, transition.expr, transition.x, transition.y);
+            builder->addTransition(transition.id, transition.player, transition.expr, transition.x, transition.y);
         }
 
     //Add all the arcs
@@ -553,6 +553,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     t.y = 0;
     t.id = element->first_attribute("id")->value();
     t.expr = nullptr;
+    t.player = 0;
 
 
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
@@ -567,6 +568,12 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
         } else if (strcmp(it->name(), "assignments") == 0) {
             std::cerr << "assignments not supported" << std::endl;
             exit(ErrorCode);
+        } 
+        else if (strcmp(it->name(), "player") == 0)
+        {
+            string text;
+            parseValue(it, text);
+            t.player = atoll(text.c_str());
         }
     }
     //Add transition to list

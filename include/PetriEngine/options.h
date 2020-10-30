@@ -45,6 +45,8 @@ struct options_t {
     bool isCPN = false;
     uint32_t seed_offset = 0;
 
+    // for game
+    bool isGame = false;
     void print() {
         if (!printstatistics) {
             return;

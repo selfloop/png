@@ -47,6 +47,7 @@ class PNMLParser {
         std::string id;
         double x, y;
         PetriEngine::Colored::GuardExpression_ptr expr;
+        size_t player;
     };
     typedef std::vector<Transition> TransitionList;
     typedef TransitionList::iterator TransitionIter;

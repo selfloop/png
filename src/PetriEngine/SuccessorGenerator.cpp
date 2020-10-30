@@ -18,8 +18,8 @@
 #include <cassert>
 namespace PetriEngine {
 
-    SuccessorGenerator::SuccessorGenerator(const PetriNet& net)
-    : _net(net), _parent(NULL) {
+    SuccessorGenerator::SuccessorGenerator(const PetriNet& net, bool is_game)
+    : _net(net), _parent(NULL),  _is_game(is_game) {
         reset();
     }
     SuccessorGenerator::SuccessorGenerator(const PetriNet& net, std::vector<std::shared_ptr<PQL::Condition> >& queries) : SuccessorGenerator(net){}
@@ -86,7 +86,7 @@ namespace PetriEngine {
         }
     }
 
-    bool SuccessorGenerator::next(Structures::State& write) {
+    bool SuccessorGenerator::next(Structures::State& write, PetriNet::player_t player) {
         for (; _suc_pcounter < _net._nplaces; ++_suc_pcounter) {
             // orphans are currently under "place 0" as a special case
             if (_suc_pcounter == 0 || (*_parent).marking()[_suc_pcounter] > 0) {
@@ -95,7 +95,8 @@ namespace PetriEngine {
                 }
                 uint32_t last = _net._placeToPtrs[_suc_pcounter + 1];
                 for (; _suc_tcounter != last; ++_suc_tcounter) {
-
+                    if (_is_game && !_net.ownedBy(_suc_tcounter, player))
+                        continue;
                     if (!checkPreset(_suc_tcounter)) continue;
                     memcpy(write.marking(), (*_parent).marking(), _net._nplaces * sizeof (MarkVal));
                     consumePreset(write, _suc_tcounter);
@@ -108,6 +109,7 @@ namespace PetriEngine {
             }
             _suc_tcounter = std::numeric_limits<uint32_t>::max();
         }
+        reset();
         return false;
     }
 }

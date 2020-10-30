@@ -59,20 +59,23 @@ namespace PetriEngine {
         
     }
 
-    void PetriNetBuilder::addTransition(const string &name,
+    void PetriNetBuilder::addTransition(const string &name, const uint32_t player,
             double, double) {
         if(_transitionnames.count(name) == 0)
         {
             uint32_t next = _transitionnames.size();
             _transitions.emplace_back();
+            _transitions.back().player = player;
             _transitionnames[name] = next;
-        }
+        } 
+        else if(player != -1) 
+            _transitions[_transitionnames[name]].player = player;
     }
 
     void PetriNetBuilder::addInputArc(const string &place, const string &transition, bool inhibitor, int weight) {
         if(_transitionnames.count(transition) == 0)
         {
-            addTransition(transition,0.0,0.0);
+            addTransition(transition,-1,0.0,0.0);
         }
         if(_placenames.count(place) == 0)
         {
@@ -97,7 +100,7 @@ namespace PetriEngine {
     void PetriNetBuilder::addOutputArc(const string &transition, const string &place, int weight) {
         if(_transitionnames.count(transition) == 0)
         {
-            addTransition(transition,0,0);
+            addTransition(transition,-1,0.0,0.0);
         }
         if(_placenames.count(place) == 0)
         {
@@ -309,6 +312,7 @@ namespace PetriEngine {
                     --place_prod_count[post.place];
                     ++freeinv;
                 }
+                net->_players[freetrans] = (trans.player > 0) ? 2 : 1;
                 
                 trans_idmap[t] = freetrans;
                 
@@ -422,6 +426,15 @@ namespace PetriEngine {
         }
         
         return net;
+    }
+
+    bool PetriNetBuilder::isGame() const {
+        for(size_t i = 0; i < _transitions.size(); ++i)
+        {
+            if(_transitions[i].player != 0)
+                return true;
+        }
+        return false;
     }
     
     void PetriNetBuilder::sort()

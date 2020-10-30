@@ -33,19 +33,19 @@ namespace PetriEngine {
         }
     }
 
-    void ColoredPetriNetBuilder::addTransition(const std::string& name, double x, double y) {
+    void ColoredPetriNetBuilder::addTransition(const std::string& name, const uint32_t player, double x, double y) {
         if (!_isColored) {
-            _ptBuilder.addTransition(name, x, y);
+            _ptBuilder.addTransition(name, player, x, y);
         }
     }
 
-    void ColoredPetriNetBuilder::addTransition(const std::string& name, const Colored::GuardExpression_ptr& guard, double x, double y) {
+    void ColoredPetriNetBuilder::addTransition(const std::string& name, const uint32_t player, const Colored::GuardExpression_ptr& guard, double x, double y) {
         if(_transitionnames.count(name) == 0)
         {
             uint32_t next = _transitionnames.size();
-            _transitions.emplace_back(Colored::Transition {name, guard});
+            _transitions.emplace_back(Colored::Transition {name, guard, player});
             _transitionnames[name] = next;
-        }
+        } else if (player != -1) _transitions[_transitionnames[name]].player = player;
     }
 
     void ColoredPetriNetBuilder::addInputArc(const std::string& place, const std::string& transition, bool inhibitor, int weight) {
@@ -72,7 +72,7 @@ namespace PetriEngine {
         if(_transitionnames.count(transition) == 0)
         {
             std::cout << "Transition '" << transition << "' not found. Adding it." << std::endl;
-            addTransition(transition,0.0,0.0);
+            addTransition(transition,-1,0.0,0.0);
         }
         if(_placenames.count(place) == 0)
         {
@@ -97,7 +97,15 @@ namespace PetriEngine {
     void ColoredPetriNetBuilder::addColorType(const std::string& id, Colored::ColorType* type) {
         _colors[id] = type;
     }
-
+    bool ColoredPetriNetBuilder::isGame() const {
+        for(size_t i = 0; i < _transitions.size(); ++i)
+        {
+            if(_transitions[i].player != 0)
+                return true;
+        }
+        return _ptBuilder.isGame();
+    }
+    
     void ColoredPetriNetBuilder::sort() {
 
     }
@@ -137,7 +145,7 @@ namespace PetriEngine {
         size_t i = 0;
         for (auto& b : gen) {
             std::string name = transition.name + ";" + std::to_string(i++);
-            _ptBuilder.addTransition(name, 0.0, 0.0);
+            _ptBuilder.addTransition(name, transition.player, 0.0, 0.0);
             _pttransitionnames[transition.name].push_back(name);
             ++_npttransitions;
             for (auto& arc : transition.arcs) {
@@ -172,7 +180,7 @@ namespace PetriEngine {
             }
 
             for (auto& transition : _transitions) {
-                _ptBuilder.addTransition(transition.name, 0.0, 0.0);
+                _ptBuilder.addTransition(transition.name, transition.player, 0.0, 0.0);
                 for (auto& arc : transition.arcs) {
                     try {
                         if (arc.input) {

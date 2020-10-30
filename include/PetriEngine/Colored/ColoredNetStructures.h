@@ -33,6 +33,7 @@ namespace PetriEngine {
         struct Transition {
             std::string name;
             GuardExpression_ptr guard;
+            uint32_t player;
             std::vector<Arc> arcs;
         };
         

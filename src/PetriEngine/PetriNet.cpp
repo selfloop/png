@@ -33,6 +33,7 @@ namespace PetriEngine {
 
     PetriNet::PetriNet(uint32_t trans, uint32_t invariants, uint32_t places)
     : _ninvariants(invariants), _ntransitions(trans), _nplaces(places),
+            _players(_ntransitions, 1),
             _transitions(_ntransitions+1),
             _invariants(_ninvariants),            
             _placeToPtrs(_nplaces+1) {
@@ -141,6 +142,12 @@ namespace PetriEngine {
         uint32_t last = _transitions[id+1].inputs;
         return std::make_pair(&_invariants[first], &_invariants[last]);
     }
+
+    bool PetriNet::ownedBy(uint32_t id, player_t p) const {
+        if(p == ANY) return true;
+        return (p & _players[id]) != 0;
+    }
+
     
     bool PetriNet::fireable(const MarkVal *marking, int transitionIndex)
     {
