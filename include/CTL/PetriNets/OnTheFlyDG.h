@@ -19,6 +19,7 @@
 namespace PetriNets {
   class OnTheFlyDG : public DependencyGraph::BasicDependencyGraph {
     public:
+      using Edge = DependencyGraph::Edge;
       using Condition = PetriEngine::PQL::Condition;
       using Condition_ptr = PetriEngine::PQL::Condition_ptr;
       using Marking = PetriEngine::Structures::State;
@@ -27,7 +28,7 @@ namespace PetriNets {
       virtual ~OnTheFlyDG();
 
       //Dependency graph interface
-      virtual std::vector<DependencyGraph::Edge *> successors(DependencyGraph::Configuration *conf) override;
+      virtual std::vector<DependencyGraph::Edge *> successors(DependencyGraph::Configuration *config) override;
       virtual DependencyGraph::Configuration *initialConfiguration() override;
       virtual void cleanUp() override;
       void setQuery(const Condition_ptr &query);
@@ -67,7 +68,7 @@ namespace PetriNets {
       void nextStates(Marking &t_marking, Condition *,
                       std::function<void()> pre,
                       std::function<bool(Marking &)> foreach,
-                      const std::function<void()>& post);
+                      const std::function<void()> &post);
       template<typename T>
       void dowork(T &gen, bool &first,
                   std::function<void()> &pre,
@@ -108,7 +109,10 @@ namespace PetriNets {
       bool _partial_order = false;
 
     private:
-      inline void addSuccessorsForNegation(PetriConfig *v, vector<DependencyGraph::Edge *> &succs);
+      PetriEngine::PQL::DistanceContext context;
+      PetriConfig *petriConfig;
+      std::vector<Edge *> succs;
+
       inline bool fastEvalConjunctionConditions(PetriEngine::PQL::AndCondition *condition,
                                                 vector<Condition *> &evaluatedConditions);
       inline bool fastEvalDisjunctionConditions(PetriEngine::PQL::OrCondition *condition,
@@ -116,26 +120,15 @@ namespace PetriNets {
       inline bool shortCircuitFastEvalConditions(Condition::Result shortCircuitCondition,
                                                  PetriEngine::PQL::LogicalCondition *condition,
                                                  vector<Condition *> &evaluatedConditions);
-      inline void addSuccessorsForConjunction(PetriConfig *v, vector<DependencyGraph::Edge *> &succs);
-      inline void addSuccessorsForDisjunction(PetriConfig *v, vector<DependencyGraph::Edge *> &succs);
-      inline void addSuccessorsForAX(PetriEngine::PQL::DistanceContext &context,
-                                     PetriConfig *v,
-                                     vector<DependencyGraph::Edge *> &succs);
-      inline void addSuccessorsForAU(PetriEngine::PQL::DistanceContext &context,
-                                     PetriConfig *v,
-                                     vector<DependencyGraph::Edge *> &succs);
-      inline void addSuccessorsForAF(PetriEngine::PQL::DistanceContext &context,
-                                     PetriConfig *v,
-                                     vector<DependencyGraph::Edge *> &succs);
-      inline void addSuccessorsForEU(PetriEngine::PQL::DistanceContext &context,
-                                     PetriConfig *v,
-                                     vector<DependencyGraph::Edge *> &succs);
-      inline void addSuccessorsForEF(PetriEngine::PQL::DistanceContext &context,
-                                     PetriConfig *v,
-                                     vector<DependencyGraph::Edge *> &succs);
-      inline void addSuccessorsForEX(PetriEngine::PQL::DistanceContext &context,
-                                     PetriConfig *v,
-                                     vector<DependencyGraph::Edge *> &succs);
+      inline void addSuccessorsForNegation();
+      inline void addSuccessorsForConjunction();
+      inline void addSuccessorsForDisjunction();
+      inline void addSuccessorsForAX();
+      inline void addSuccessorsForAU();
+      inline void addSuccessorsForAF();
+      inline void addSuccessorsForEU();
+      inline void addSuccessorsForEF();
+      inline void addSuccessorsForEX();
   };
 
 }
