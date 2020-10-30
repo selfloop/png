@@ -1,0 +1,809 @@
+
+abp-test005:1:Query is satisfied.
+abp-test005:2:Query is satisfied.
+abp-test006:1:Query is satisfied.
+abp-test006:2:Query is NOT satisfied.
+abp-test007:1:Query is satisfied.
+abp-test007:2:Query is satisfied.
+abp-test008:1:Query is NOT satisfied.
+abp-test008:2:Query is satisfied.
+arithmetic-test001:1:Query is satisfied.
+arithmetic-test001:2:Query is satisfied.
+arithmetic-test001:3:Query is NOT satisfied.
+arithmetic-test001:4:Query is satisfied.
+arithmetic-test001:5:Query is NOT satisfied.
+arithmetic-test002:1:Query is satisfied.
+arithmetic-test002:2:Query is satisfied.
+arithmetic-test002:3:Query is satisfied.
+arithmetic-test002:4:Query is satisfied.
+arithmetic-test002:5:Query is satisfied.
+arithmetic-test002:6:Query is NOT satisfied.
+arithmetic-test002:7:Query is NOT satisfied.
+arithmetic-test002:8:Query is NOT satisfied.
+arithmetic-test002:9:Query is NOT satisfied.
+arithmetic-test003:1:Query is satisfied.
+arithmetic-test003:2:Query is satisfied.
+arithmetic-test003:3:Query is satisfied.
+arithmetic-test003:4:Query is satisfied.
+arithmetic-test003:5:Query is satisfied.
+arithmetic-test003:6:Query is NOT satisfied.
+arithmetic-test003:7:Query is satisfied.
+arithmetic-test003:8:Query is NOT satisfied.
+arithmetic-test003:9:Query is satisfied.
+arithmetic-test004:1:Query is NOT satisfied.
+arithmetic-test004:2:Query is satisfied.
+arithmetic-test005:1:Query is satisfied.
+arithmetic-test005:2:Query is satisfied.
+arithmetic-test006:1:Query is satisfied.
+arithmetic-test006:2:Query is NOT satisfied.
+arithmetic-test006:3:Query is NOT satisfied.
+arithmetic-test007:1:Query is satisfied.
+arithmetic-test007:2:Query is NOT satisfied.
+arithmetic-test007:3:Query is satisfied.
+arithmetic-test007:4:Query is NOT satisfied.
+arithmetic-test007:5:Query is satisfied.
+combined-test001:2:Query is satisfied.
+combined-test001:3:Query is satisfied.
+combined-test001:5:Query is NOT satisfied.
+combined-test002:1:Query is satisfied.
+combined-test002:2:Query is NOT satisfied.
+combined-test002:3:Query is satisfied.
+combined-test002:4:Query is satisfied.
+combined-test003:1:Query is satisfied.
+combined-test003:2:Query is satisfied.
+combined-test003:3:Query is NOT satisfied.
+combined-test004:1:Query is satisfied.
+combined-test004:2:Query is satisfied.
+combined-test004:3:Query is NOT satisfied.
+combined-test005:1:Query is satisfied.
+combined-test006:1:Query is satisfied.
+combined-test007:1:Query is satisfied.
+combined-test007:2:Query is NOT satisfied.
+combined-test007:3:Query is satisfied.
+combined-test007:4:Query is NOT satisfied.
+combined-test007:5:Query is NOT satisfied.
+composition-prime-test001:1:Query is satisfied.
+composition-prime-test002:1:Query is satisfied.
+composition-prime-test003:1:Query is satisfied.
+composition-prime-test004:1:Query is satisfied.
+composition-prime-test005:1:Query is satisfied.
+composition-test001:1:Query is satisfied.
+composition-test002:1:Query is satisfied.
+composition-test003:1:Query is satisfied.
+composition-test004:1:Query is NOT satisfied.
+composition-test005:1:Query is satisfied.
+composition-test006:1:Query is satisfied.
+composition-test007:1:Query is satisfied.
+composition-test008:1:Query is NOT satisfied.
+composition-test009:1:Query is satisfied.
+composition-test009:2:Query is NOT satisfied.
+composition-test009:3:Query is satisfied.
+composition-test010:1:Query is satisfied.
+composition-test011:1:Query is satisfied.
+composition-test012:1:Query is satisfied.
+composition-test012:2:Query is NOT satisfied.
+composition-test012:3:Query is satisfied.
+composition-test013:1:Query is satisfied.
+composition-test013:2:Query is NOT satisfied.
+composition-test013:3:Query is satisfied.
+composition-test014:1:Query is satisfied.
+composition-test015:1:Query is satisfied.
+constant-test001:1:Query is satisfied.
+constant-test002:1:Query is satisfied.
+continuous-test001:1:Query is NOT satisfied.
+continuous-test001:2:Query is satisfied.
+continuous-test002:1:Query is satisfied.
+continuous-test002:2:Query is satisfied.
+continuous-test003:1:Query is NOT satisfied.
+continuous-test004:1:Query is NOT satisfied.
+continuous-test005:1:Query is satisfied.
+continuous-test006:1:Query is satisfied.
+continuous-test007:1:Query is satisfied.
+continuous-test008:1:Query is satisfied.
+continuous-test008:2:Query is satisfied.
+continuous-test009:1:Query is NOT satisfied.
+continuous-test009:2:Query is satisfied.
+continuous-test009:3:Query is satisfied.
+continuous-test009:4:Query is NOT satisfied.
+deadlock-test001:1:Query is satisfied.
+deadlock-test002:1:Query is NOT satisfied.
+deadlock-test002:2:Query is NOT satisfied.
+deadlock-test002:3:Query is NOT satisfied.
+deadlock-test003:1:Query is satisfied.
+deadlock-test003:2:Query is satisfied.
+deadlock-test003:3:Query is NOT satisfied.
+deadlock-test004:1:Query is satisfied.
+deadlock-test005:1:Query is NOT satisfied.
+deadlock-test005:2:Query is NOT satisfied.
+deadlock-test005:3:Query is satisfied.
+deadlock-test006:1:Query is satisfied.
+deadlock-test006:2:Query is NOT satisfied.
+deadlock-test007:1:Query is satisfied.
+deadlock-test008:1:Query is satisfied.
+deadlock-test009:1:Query is NOT satisfied.
+deadlock-test010:1:Query is NOT satisfied.
+deadlock-test013:1:Query is satisfied.
+deadlock-test013:2:Query is NOT satisfied.
+deadlock-test013:3:Query is NOT satisfied.
+deadlock-test014:1:Query is NOT satisfied.
+deadlock-test014:2:Query is satisfied.
+deadlock-test014:3:Query is satisfied.
+deadlock-test015:1:Query is NOT satisfied.
+deadlock-test016:2:Query is NOT satisfied.
+deadlock-test017:1:Query is satisfied.
+deadlock-test017:2:Query is satisfied.
+deadlock-test017:3:Query is satisfied.
+deadlock-test017:4:Query is NOT satisfied.
+deadlock-test017:5:Query is NOT satisfied.
+deadlock-test018:1:Query is satisfied.
+deadlock-test018:2:Query is satisfied.
+deadlock-test019:1:Query is satisfied.
+deadlock-test020:1:Query is satisfied.
+deadlock-test020:2:Query is satisfied.
+deadlock-test020:3:Query is NOT satisfied.
+deadlock-test020:4:Query is satisfied.
+deadlock-test020:5:Query is satisfied.
+deadlock-test020:6:Query is satisfied.
+deadlock-test020:7:Query is NOT satisfied.
+deadlock-test021:1:Query is satisfied.
+deadlock-test021:2:Query is satisfied.
+deadlock-test021:3:Query is NOT satisfied.
+deadlock-test021:4:Query is NOT satisfied.
+deadlock-test021:5:Query is NOT satisfied.
+deadlock-test021:6:Query is NOT satisfied.
+deadlock-test021:7:Query is satisfied.
+discrete-test001:1:Query is NOT satisfied.
+discrete-test001:2:Query is satisfied.
+discrete-test002:1:Query is NOT satisfied.
+discrete-test002:2:Query is satisfied.
+discrete-test003:1:Query is satisfied.
+discrete-test003:2:Query is satisfied.
+discrete-test004:1:Query is satisfied.
+discrete-test004:2:Query is satisfied.
+discrete-test004:3:Query is NOT satisfied.
+discrete-test005:1:Query is satisfied.
+discrete-test005:2:Query is NOT satisfied.
+discrete-test006:3:Query is NOT satisfied.
+discrete-test006:4:Query is NOT satisfied.
+discrete-test006:5:Query is NOT satisfied.
+discrete-test006:6:Query is satisfied.
+discrete-test006:7:Query is satisfied.
+discrete-test006:8:Query is NOT satisfied.
+discrete-test007:1:Query is satisfied.
+discrete-test007:2:Query is NOT satisfied.
+discrete-test007:3:Query is satisfied.
+discrete-test007:4:Query is satisfied.
+discrete-test007:5:Query is NOT satisfied.
+discrete-test007:6:Query is satisfied.
+discrete-test008:1:Query is satisfied.
+discrete-test008:2:Query is NOT satisfied.
+discrete-test008:3:Query is satisfied.
+discrete-test008:4:Query is satisfied.
+discrete-test-009:1:Query is satisfied.
+discrete-test009:1:Query is satisfied.
+discrete-test-009:2:Query is satisfied.
+discrete-test009:2:Query is satisfied.
+discrete-test-009:3:Query is satisfied.
+discrete-test009:3:Query is satisfied.
+discrete-test-009:4:Query is satisfied.
+discrete-test009:4:Query is satisfied.
+discrete-test-009:5:Query is NOT satisfied.
+discrete-test009:5:Query is NOT satisfied.
+discrete-test010:1:Query is NOT satisfied.
+discrete-test010:2:Query is NOT satisfied.
+discrete-test010:4:Query is NOT satisfied.
+discrete-test010:5:Query is NOT satisfied.
+discrete-test010:6:Query is satisfied.
+discrete-test010:7:Query is NOT satisfied.
+discrete-test010:8:Query is satisfied.
+discrete-test011:1:Query is satisfied.
+discrete-test011:2:Query is NOT satisfied.
+discrete-test011:3:Query is satisfied.
+discrete-test011:4:Query is NOT satisfied.
+discrete-test011:5:Query is satisfied.
+discrete-test011:6:Query is satisfied.
+discrete-test012:1:Query is satisfied.
+division-test001:1:Query is satisfied.
+division-test002:1:Query is satisfied.
+error-conjunction-bug-test001:1:Query is satisfied.
+error-conjunction-reducer-test002:1:Query is satisfied.
+error-conjunction-reducer-test002:2:Query is NOT satisfied.
+error-encoder-test-001:1:Query is satisfied.
+exercise-test001:1:Query is satisfied.
+exercise-test001:2:Query is satisfied.
+exercise-test001:3:Query is NOT satisfied.
+exercise-test002:1:Query is satisfied.
+exercise-test002:2:Query is satisfied.
+exercise-test003:1:Query is NOT satisfied.
+exercise-test004:1:Query is satisfied.
+exercise-test005:1:Query is satisfied.
+exercise-test006:1:Query is satisfied.
+exercise-test007:1:Query is satisfied.
+exercise-test008:1:Query is satisfied.
+exercise-test009:1:Query is satisfied.
+exercise-test010:1:Query is NOT satisfied.
+extra-test-001-liveness:1:Query is NOT satisfied.
+extra-test-001-liveness:2:Query is satisfied.
+extra-test-002-search-order:1:Query is satisfied.
+extra-test-003-maintanance:1:Query is satisfied.
+extra-test-004-burger:1:Query is satisfied.
+extra-test-004-transfusion:1:Query is NOT satisfied.
+extra-test-005-liveness:1:Query is NOT satisfied.
+extra-test-005-liveness:2:Query is NOT satisfied.
+extra-test-005-liveness:3:Query is satisfied.
+extra-test-005-liveness:4:Query is satisfied.
+extra-test-006-liveness:1:Query is satisfied.
+extra-test-006-liveness:2:Query is satisfied.
+extra-test-006-liveness:3:Query is satisfied.
+extra-test-006-liveness:4:Query is satisfied.
+extra-test-007-liveness:1:Query is satisfied.
+extra-test-007-liveness:2:Query is satisfied.
+extra-test-007-liveness:3:Query is NOT satisfied.
+FMS2-untimed:10:Query is satisfied.
+FMS2-untimed:11:Query is NOT satisfied.
+FMS2-untimed:12:Query is NOT satisfied.
+FMS2-untimed:13:Query is NOT satisfied.
+FMS2-untimed:14:Query is NOT satisfied.
+FMS2-untimed:15:Query is NOT satisfied.
+FMS2-untimed:16:Query is NOT satisfied.
+FMS2-untimed:17:Query is NOT satisfied.
+FMS2-untimed:18:Query is NOT satisfied.
+FMS2-untimed:19:Query is NOT satisfied.
+FMS2-untimed:1:Query is satisfied.
+FMS2-untimed:20:Query is NOT satisfied.
+FMS2-untimed:2:Query is satisfied.
+FMS2-untimed:3:Query is satisfied.
+FMS2-untimed:4:Query is satisfied.
+FMS2-untimed:5:Query is satisfied.
+FMS2-untimed:6:Query is satisfied.
+FMS2-untimed:7:Query is satisfied.
+FMS2-untimed:8:Query is satisfied.
+FMS2-untimed:9:Query is satisfied.
+fms-test001:1:Query is satisfied.
+fms-test001:2:Query is satisfied.
+fms-test001:3:Query is NOT satisfied.
+fms-test001:4:Query is NOT satisfied.
+inclusion-test001:1:Query is NOT satisfied.
+inclusion-test001:2:Query is satisfied.
+inclusion-test001:3:Query is NOT satisfied.
+inclusion-test001:4:Query is satisfied.
+inclusion-test002:1:Query is satisfied.
+inclusion-test002:2:Query is NOT satisfied.
+inclusion-test002:3:Query is satisfied.
+inclusion-test002:4:Query is satisfied.
+inclusion-test002:5:Query is NOT satisfied.
+inclusion-test003:1:Query is NOT satisfied.
+inclusion-test003:2:Query is NOT satisfied.
+inclusion-test003:3:Query is satisfied.
+inclusion-test003:4:Query is satisfied.
+inclusion-test003:5:Query is NOT satisfied.
+inclusion-test004:1:Query is satisfied.
+inclusion-test004:2:Query is NOT satisfied.
+inclusion-test004:3:Query is satisfied.
+inclusion-test004:4:Query is NOT satisfied.
+inclusion-test005:1:Query is satisfied.
+inclusion-test005:2:Query is NOT satisfied.
+inclusion-test005:3:Query is satisfied.
+inclusion-test005:4:Query is NOT satisfied.
+inclusion-test006:1:Query is satisfied.
+inclusion-test006:2:Query is satisfied.
+inclusion-test007:1:Query is NOT satisfied.
+inclusion-test007:2:Query is NOT satisfied.
+inclusion-test007:3:Query is satisfied.
+inhibitors-test001:1:Query is satisfied.
+inhibitors-test002:1:Query is satisfied.
+inhibitors-test003:1:Query is satisfied.
+inhibitors-test004:1:Query is satisfied.
+invariants-test001:1:Query is satisfied.
+invariants-test002:1:Query is satisfied.
+invariants-test003:1:Query is satisfied.
+invariants-test004:1:Query is satisfied.
+invariants-test005:1:Query is satisfied.
+invariants-test006:1:Query is satisfied.
+invariants-test007:1:Query is satisfied.
+invariants-test008:1:Query is satisfied.
+invariants-test009:1:Query is satisfied.
+invariants-test010:1:Query is satisfied.
+invariants-test011:1:Query is NOT satisfied.
+invariants-test011:2:Query is NOT satisfied.
+invariants-test011:3:Query is NOT satisfied.
+Kanban2-test001:1:Query is NOT satisfied.
+Kanban2-test001:2:Query is NOT satisfied.
+Kanban2-test001:3:Query is satisfied.
+Kanban2-test001:4:Query is NOT satisfied.
+lightcross-text001:1:Query is NOT satisfied.
+lightcross-text001:2:Query is NOT satisfied.
+lightcross-text001:3:Query is NOT satisfied.
+liveness-test001:1:Query is satisfied.
+liveness-test001:2:Query is satisfied.
+liveness-test001:3:Query is NOT satisfied.
+liveness-test002:1:Query is satisfied.
+liveness-test003:1:Query is satisfied.
+MAPK-test001:1:Query is NOT satisfied.
+MAPK-test001:2:Query is NOT satisfied.
+MAPK-test001:3:Query is satisfied.
+orphans-test001:1:Query is satisfied.
+orphans-test002:1:Query is satisfied.
+orphans-test003:1:Query is NOT satisfied.
+orphans-test004:1:Query is NOT satisfied.
+other-test001:1:Query is satisfied.
+other-test002:1:Query is satisfied.
+other-test003:1:Query is satisfied.
+other-test004:1:Query is NOT satisfied.
+other-test005:1:Query is satisfied.
+other-test006:1:Query is satisfied.
+other-test007:1:Query is satisfied.
+other-test008:1:Query is satisfied.
+other-test009:1:Query is satisfied.
+other-test010:1:Query is satisfied.
+other-test011:1:Query is NOT satisfied.
+other-test012:1:Query is satisfied.
+other-test012:2:Query is NOT satisfied.
+other-test013:1:Query is NOT satisfied.
+other-test013:2:Query is satisfied.
+other-test013:3:Query is satisfied.
+other-test013:4:Query is satisfied.
+other-test013:5:Query is satisfied.
+other-test014:1:Query is NOT satisfied.
+other-test014:2:Query is satisfied.
+other-test014:3:Query is satisfied.
+other-test014:4:Query is satisfied.
+other-test014:5:Query is satisfied.
+other-test015:1:Query is satisfied.
+other-test015:2:Query is satisfied.
+other-test015:3:Query is NOT satisfied.
+other-test015:4:Query is satisfied.
+prime-test001:1:Query is satisfied.
+prime-test0019:1:Query is NOT satisfied.
+prime-test0020:1:Query is NOT satisfied.
+prime-test0021:1:Query is satisfied.
+prime-test002:1:Query is satisfied.
+prime-test0022:1:Query is satisfied.
+prime-test003:1:Query is satisfied.
+prime-test004:1:Query is satisfied.
+prime-test005:1:Query is satisfied.
+prime-test006:1:Query is satisfied.
+prime-test007:1:Query is satisfied.
+prime-test008:1:Query is satisfied.
+prime-test009:1:Query is satisfied.
+prime-test010:1:Query is satisfied.
+prime-test011:1:Query is satisfied.
+prime-test012:1:Query is satisfied.
+prime-test013:1:Query is satisfied.
+prime-test014:1:Query is satisfied.
+prime-test015:1:Query is satisfied.
+prime-test016:1:Query is satisfied.
+prime-test016:2:Query is NOT satisfied.
+prime-test017:1:Query is NOT satisfied.
+prime-test017:2:Query is satisfied.
+prime-test018:1:Query is satisfied.
+prime-test018:2:Query is NOT satisfied.
+prime-test019:1:Query is NOT satisfied.
+prime-test020:1:Query is satisfied.
+prime-test023:1:Query is NOT satisfied.
+prime-test024:1:Query is NOT satisfied.
+productline-test001:1:Query is satisfied.
+productline-test002:1:Query is satisfied.
+productline-test003:1:Query is satisfied.
+productline-test004:1:Query is satisfied.
+productline-test005:1:Query is satisfied.
+query-test001:1:Query is NOT satisfied.
+query-test001:2:Query is NOT satisfied.
+query-test001:3:Query is NOT satisfied.
+query-test001:4:Query is satisfied.
+query-test001:5:Query is satisfied.
+query-test001:6:Query is satisfied.
+query-test001:7:Query is satisfied.
+query-test001:8:Query is NOT satisfied.
+query-test002:1:Query is satisfied.
+query-test002:2:Query is NOT satisfied.
+query-test002:3:Query is satisfied.
+query-test002:4:Query is NOT satisfied.
+query-test002:5:Query is satisfied.
+query-test002:6:Query is NOT satisfied.
+query-test002:7:Query is satisfied.
+query-test002:8:Query is satisfied.
+query-test002:9:Query is satisfied.
+query-test003:1:Query is satisfied.
+query-test003:2:Query is satisfied.
+query-test003:3:Query is NOT satisfied.
+query-test003:4:Query is satisfied.
+query-test003:5:Query is NOT satisfied.
+query-test004:1:Query is NOT satisfied.
+query-test004:2:Query is satisfied.
+query-test004:3:Query is NOT satisfied.
+query-test004:4:Query is satisfied.
+query-test005:1:Query is NOT satisfied.
+query-test005:2:Query is satisfied.
+reduction-001:1:Query is satisfied.
+reduction-002:1:Query is satisfied.
+reduction-003:1:Query is NOT satisfied.
+reduction-004:1:Query is NOT satisfied.
+reduction-005:1:Query is satisfied.
+reduction-006:1:Query is satisfied.
+reduction-007:1:Query is satisfied.
+reduction-008-house:1:Query is NOT satisfied.
+reduction-008-house:2:Query is satisfied.
+reduction-009:1:Query is satisfied.
+reduction-010:1:Query is satisfied.
+reduction-011:1:Query is satisfied.
+reduction-012:1:Query is satisfied.
+reduction-013:1:Query is satisfied.
+reduction-014:1:Query is satisfied.
+reduction-015:1:Query is satisfied.
+reduction-016:1:Query is NOT satisfied.
+reduction-017:1:Query is satisfied.
+reduction-018:1:Query is NOT satisfied.
+reduction-019-deadlock:1:Query is satisfied.
+reduction-020-deadlock:1:Query is satisfied.
+reduction-021-deadlock:1:Query is satisfied.
+reduction-022-deadlock:1:Query is satisfied.
+reduction-023-deadlock:1:Query is satisfied.
+reduction-024:1:Query is satisfied.
+reduction-024:2:Query is satisfied.
+reduction-025:1:Query is satisfied.
+reduction-025:2:Query is NOT satisfied.
+reduction-026:1:Query is satisfied.
+reduction-026:2:Query is NOT satisfied.
+reduction-027:1:Query is satisfied.
+reduction-027:2:Query is NOT satisfied.
+reduction-028:1:Query is satisfied.
+reduction-028:2:Query is NOT satisfied.
+reduction-029:1:Query is NOT satisfied.
+reduction-029:2:Query is NOT satisfied.
+reduction-030:1:Query is NOT satisfied.
+reduction-030:2:Query is NOT satisfied.
+reduction-031:1:Query is satisfied.
+reduction-031:2:Query is satisfied.
+reduction-032:1:Query is NOT satisfied.
+reduction-032:2:Query is satisfied.
+reduction-033:1:Query is NOT satisfied.
+reduction-033:2:Query is satisfied.
+reduction-034:1:Query is NOT satisfied.
+reduction-034:2:Query is satisfied.
+reduction-035:1:Query is NOT satisfied.
+reduction-036:1:Query is satisfied.
+reduction-037:1:Query is satisfied.
+reduction-037:2:Query is satisfied.
+reduction-038:1:Query is satisfied.
+reduction-038:2:Query is satisfied.
+reduction-039:1:Query is satisfied.
+reduction-039:2:Query is satisfied.
+reduction-039:3:Query is NOT satisfied.
+reduction-040:1:Query is satisfied.
+reduction-041:1:Query is satisfied.
+reduction-042:1:Query is NOT satisfied.
+reduction-042:2:Query is satisfied.
+reduction-043:1:Query is satisfied.
+reduction-044:1:Query is satisfied.
+reduction-044:2:Query is satisfied.
+reduction-045:1:Query is satisfied.
+reduction-045:2:Query is satisfied.
+reduction-046:1:Query is satisfied.
+reduction-046:2:Query is NOT satisfied.
+reduction-046:3:Query is NOT satisfied.
+reduction-047:1:Query is satisfied.
+reduction-047:2:Query is NOT satisfied.
+reduction-047:3:Query is NOT satisfied.
+reduction-048:1:Query is satisfied.
+reduction-048:2:Query is NOT satisfied.
+reduction-048:3:Query is satisfied.
+reduction-049:1:Query is satisfied.
+reduction-049:2:Query is satisfied.
+reduction-050:1:Query is NOT satisfied.
+shortest-path-test001:1:Query is satisfied.
+shortest-path-test002:1:Query is satisfied.
+simple-test001:1:Query is satisfied.
+simple-test002:1:Query is satisfied.
+simple-test003:1:Query is satisfied.
+simple-test004:1:Query is satisfied.
+simple-test005:1:Query is satisfied.
+simple-test006:1:Query is satisfied.
+simple-test007:1:Query is satisfied.
+simple-test008:1:Query is NOT satisfied.
+simple-test009:1:Query is NOT satisfied.
+simple-test010:1:Query is satisfied.
+simple-test011:1:Query is NOT satisfied.
+simple-test012:1:Query is satisfied.
+simple-test013:1:Query is satisfied.
+simple-test014:1:Query is satisfied.
+simple-test015:1:Query is satisfied.
+simple-test016:1:Query is satisfied.
+simple-test017:1:Query is satisfied.
+simple-test018:1:Query is satisfied.
+simple-test018:2:Query is satisfied.
+simple-test019:1:Query is satisfied.
+simple-test019:2:Query is satisfied.
+simple-test019:3:Query is satisfied.
+simple-test020:1:Query is satisfied.
+simple-test020:2:Query is NOT satisfied.
+sim-test001:2:Query is satisfied.
+sim-test002:2:Query is satisfied.
+subsetsum-test001:1:Query is satisfied.
+subsetsum-test002:1:Query is satisfied.
+subsetsum-test003:1:Query is NOT satisfied.
+subsetsum-test004:1:Query is NOT satisfied.
+subsetsum-test005:1:Query is satisfied.
+task-graph-test001:1:Query is satisfied.
+task-graph-test001:2:Query is NOT satisfied.
+task-graph-test001:3:Query is satisfied.
+task-graph-test001:4:Query is NOT satisfied.
+trace-test001:1:Query is satisfied.
+trace-test001:2:Query is satisfied.
+trace-test002:1:Query is satisfied.
+trace-test002:2:Query is satisfied.
+trace-test003:1:Query is satisfied.
+trace-test003:2:Query is satisfied.
+trace-test004:1:Query is satisfied.
+trace-test005:1:Query is NOT satisfied.
+trace-test006:1:Query is satisfied.
+trace-test007:1:Query is satisfied.
+trace-test008:1:Query is satisfied.
+train-simple-test001:1:Query is satisfied.
+train-simple-test002:1:Query is satisfied.
+train-simple-test003:1:Query is satisfied.
+train-simple-test004:1:Query is satisfied.
+train-simple-test005:1:Query is satisfied.
+transInv-test001:1:Query is NOT satisfied.
+transInv-test002:1:Query is NOT satisfied.
+transInv-test003:1:Query is NOT satisfied.
+transInv-test004:1:Query is NOT satisfied.
+transInv-test005:1:Query is NOT satisfied.
+transport-test001:1:Query is satisfied.
+transport-test002:1:Query is satisfied.
+transport-test003:1:Query is satisfied.
+transport-test004:1:Query is satisfied.
+transport-test005:1:Query is satisfied.
+transport-test006:1:Query is NOT satisfied.
+transport-test007:1:Query is satisfied.
+transport-test008:1:Query is satisfied.
+transport-test009:1:Query is satisfied.
+transport-test010:1:Query is satisfied.
+transport-test011:1:Query is satisfied.
+transport-test012:1:Query is satisfied.
+transport-test013:1:Query is satisfied.
+transport-test014:1:Query is satisfied.
+transport-test015:1:Query is satisfied.
+transport-test016:1:Query is satisfied.
+transport-test017:1:Query is satisfied.
+transport-test017:2:Query is satisfied.
+transport-test018:1:Query is satisfied.
+transport-test018:2:Query is NOT satisfied.
+transport-test019:1:Query is satisfied.
+transport-test019:2:Query is satisfied.
+transport-test019:3:Query is NOT satisfied.
+transport-test020:1:Query is satisfied.
+transport-test020:2:Query is NOT satisfied.
+transport-test021:1:Query is satisfied.
+transport-test021:2:Query is NOT satisfied.
+transport-test021:3:Query is NOT satisfied.
+transport-test022:1:Query is satisfied.
+transport-test022:2:Query is satisfied.
+transport-test022:3:Query is NOT satisfied.
+transport-test023:1:Query is NOT satisfied.
+transport-test023:2:Query is NOT satisfied.
+tricky-test001:1:Query is satisfied.
+tricky-test002:1:Query is satisfied.
+tricky-test003:1:Query is satisfied.
+tricky-test004:1:Query is satisfied.
+tricky-test004:2:Query is satisfied.
+tricky-test004:3:Query is satisfied.
+untimed-reductions-A-test001:1:Query is satisfied.
+untimed-reductions-A-test001:2:Query is NOT satisfied.
+untimed-reductions-A-test002:1:Query is satisfied.
+untimed-reductions-A-test002:2:Query is NOT satisfied.
+untimed-reductions-A-test003:1:Query is satisfied.
+untimed-reductions-A-test003:2:Query is NOT satisfied.
+untimed-reductions-A-test004:1:Query is satisfied.
+untimed-reductions-A-test004:2:Query is NOT satisfied.
+untimed-reductions-B-test001:1:Query is satisfied.
+untimed-reductions-B-test001:2:Query is NOT satisfied.
+untimed-reductions-B-test002:1:Query is satisfied.
+untimed-reductions-B-test002:2:Query is NOT satisfied.
+untimed-reductions-B-test003:1:Query is satisfied.
+untimed-reductions-B-test003:2:Query is NOT satisfied.
+untimed-reductions-B-test004:1:Query is satisfied.
+untimed-reductions-B-test004:2:Query is NOT satisfied.
+untimed-reductions-B-test005:1:Query is satisfied.
+untimed-reductions-B-test005:2:Query is NOT satisfied.
+untimed-reductions-C-test001:1:Query is satisfied.
+untimed-reductions-C-test001:2:Query is NOT satisfied.
+untimed-reductions-C-test002:1:Query is satisfied.
+untimed-reductions-C-test002:2:Query is NOT satisfied.
+untimed-reductions-C-test003:1:Query is satisfied.
+untimed-reductions-C-test003:2:Query is NOT satisfied.
+untimed-reductions-C-test004:1:Query is NOT satisfied.
+untimed-reductions-C-test004:2:Query is satisfied.
+untimed-reductions-D-test001:1:Query is satisfied.
+untimed-reductions-D-test001:2:Query is NOT satisfied.
+untimed-reductions-D-test002:1:Query is satisfied.
+untimed-reductions-D-test002:2:Query is NOT satisfied.
+untimed-reductions-E-test001:1:Query is NOT satisfied.
+untimed-reductions-jacob-A-test001:2:Query is satisfied.
+untimed-reductions-jacob-A-test001:3:Query is satisfied.
+untimed-reductions-jacob-A-test001:5:Query is satisfied.
+untimed-reductions-jacob-A-test001:6:Query is satisfied.
+untimed-reductions-jacob-B-test001:1:Query is satisfied.
+untimed-reductions-jacob-B-test001:2:Query is satisfied.
+untimed-reductions-jacob-B-test001:3:Query is satisfied.
+untimed-reductions-jacob-B-test001:4:Query is NOT satisfied.
+untimed-reductions-jacob-C-test001:2:Query is NOT satisfied.
+untimed-reductions-jacob-C-test001:3:Query is NOT satisfied.
+untimed-reductions-jacob-C-test001:4:Query is NOT satisfied.
+untimed-reductions-jacob-C-test001:5:Query is NOT satisfied.
+untimed-reductions-jacob-C-test001:6:Query is satisfied.
+untimed-reductions-jacob-D1-test001:1:Query is satisfied.
+untimed-reductions-jacob-D1-test001:2:Query is satisfied.
+untimed-reductions-jacob-D1-test001:3:Query is satisfied.
+untimed-reductions-jacob-D1-test001:4:Query is satisfied.
+untimed-reductions-jacob-D1-test001:5:Query is satisfied.
+untimed-reductions-jacob-D2-test001:1:Query is satisfied.
+untimed-reductions-jacob-E-test001:1:Query is satisfied.
+untimed-reductions-jacob-E-test001:2:Query is satisfied.
+untimed-reductions-jacob-E-test001:3:Query is satisfied.
+untimed-reductions-jacob-E-test001:4:Query is satisfied.
+untimed-reductions-mads-test001:1:Query is NOT satisfied.
+untimed-reductions-mads-test001:2:Query is satisfied.
+untimed-reductions-mads-test001:3:Query is satisfied.
+untimed-reductions-mads-test002:1:Query is satisfied.
+untimed-reductions-mads-test002:2:Query is satisfied.
+untimed-reductions-mads-test003:1:Query is satisfied.
+untimed-reductions-mads-test003:2:Query is NOT satisfied.
+untimed-reductions-mads-test004:1:Query is NOT satisfied.
+untimed-reductions-mads-test004:2:Query is NOT satisfied.
+untimed-reductions-mads-test005:1:Query is satisfied.
+untimed-reductions-mads-test005:2:Query is NOT satisfied.
+untimed-reductions-mads-test005:3:Query is satisfied.
+untimed-reductions-mads-test006:1:Query is NOT satisfied.
+untimed-reductions-mads-test006:2:Query is satisfied.
+untimed-reductions-mads-test006:3:Query is satisfied.
+untimed-reductions-mads-test007:1:Query is NOT satisfied.
+untimed-reductions-mads-test008:1:Query is NOT satisfied.
+untimed-reductions-mads-test008:2:Query is satisfied.
+untimed-reductions-mads-test008:3:Query is satisfied.
+untimed-reductions-mads-test008:4:Query is satisfied.
+untimed-reductions-mads-test009:1:Query is NOT satisfied.
+untimed-reductions-mads-test009:2:Query is NOT satisfied.
+untimed-reductions-mads-test009:3:Query is satisfied.
+untimed-test001:1:Query is satisfied.
+untimed-test001:2:Query is NOT satisfied.
+untimed-test001:3:Query is NOT satisfied.
+untimed-test001:4:Query is satisfied.
+untimed-test002:1:Query is NOT satisfied.
+untimed-test003:1:Query is NOT satisfied.
+untimed-test004:1:Query is satisfied.
+untimed-test004:2:Query is NOT satisfied.
+untimed-test004:3:Query is satisfied.
+untimed-test004:4:Query is NOT satisfied.
+untimed-test004:5:Query is satisfied.
+untimed-test005:1:Query is satisfied.
+untimed-test005:2:Query is satisfied.
+untimed-test005:3:Query is satisfied.
+untimed-test005:4:Query is satisfied.
+untimed-test005:5:Query is NOT satisfied.
+untimed-test006-philosophers:1:Query is satisfied.
+untimed-test006-philosophers:2:Query is satisfied.
+untimed-test006-philosophers:3:Query is NOT satisfied.
+untimed-test007-swimming-pool:1:Query is satisfied.
+untimed-test007-swimming-pool:2:Query is NOT satisfied.
+untimed-test007-swimming-pool:3:Query is satisfied.
+untimed-test008:1:Query is satisfied.
+untimed-test009:1:Query is satisfied.
+untimed-test010:1:Query is NOT satisfied.
+untimed-test010:2:Query is satisfied.
+untimed-test011:1:Query is NOT satisfied.
+untimed-test011:2:Query is satisfied.
+untimed-test011:3:Query is NOT satisfied.
+untimed-test011:4:Query is satisfied.
+urgency-test001:1:Query is satisfied.
+urgency-test001:2:Query is satisfied.
+urgency-test001:3:Query is satisfied.
+urgency-test001:4:Query is NOT satisfied.
+urgency-test002:1:Query is satisfied.
+urgency-test002:2:Query is NOT satisfied.
+urgency-test002:3:Query is satisfied.
+urgency-test002:4:Query is NOT satisfied.
+urgency-test003:1:Query is satisfied.
+urgency-test003:2:Query is satisfied.
+urgency-test004:1:Query is satisfied.
+urgency-test004:2:Query is satisfied.
+urgency-test004:3:Query is NOT satisfied.
+urgency-test004:4:Query is satisfied.
+urgency-test005:1:Query is satisfied.
+urgency-test005:2:Query is NOT satisfied.
+urgency-test005:3:Query is satisfied.
+urgency-test006:1:Query is satisfied.
+urgency-test006:2:Query is satisfied.
+urgency-test006:3:Query is satisfied.
+urgency-test006:4:Query is satisfied.
+urgency-test006:5:Query is satisfied.
+urgency-test006:6:Query is NOT satisfied.
+urgency-test007:1:Query is satisfied.
+urgency-test007:2:Query is satisfied.
+urgency-test007:3:Query is NOT satisfied.
+urgency-test007:4:Query is NOT satisfied.
+urgency-test007:5:Query is satisfied.
+urgency-test007:6:Query is satisfied.
+urgency-test008:1:Query is satisfied.
+urgency-test008:2:Query is NOT satisfied.
+urgency-test008:3:Query is NOT satisfied.
+urgency-test008:4:Query is NOT satisfied.
+urgency-test008:5:Query is satisfied.
+urgency-test008:6:Query is satisfied.
+urgency-test009:1:Query is satisfied.
+urgency-test009:2:Query is NOT satisfied.
+urgency-test009:3:Query is NOT satisfied.
+urgency-test009:4:Query is NOT satisfied.
+urgency-test009:5:Query is satisfied.
+urgency-test009:6:Query is satisfied.
+urgency-test010:1:Query is NOT satisfied.
+urgency-test010:2:Query is NOT satisfied.
+urgency-test011:1:Query is NOT satisfied.
+urgency-test011:2:Query is NOT satisfied.
+urgency-test012:1:Query is satisfied.
+urgency-test012:2:Query is satisfied.
+urgency-test012:3:Query is satisfied.
+urgency-test012:4:Query is NOT satisfied.
+urgency-test013:1:Query is satisfied.
+urgency-test013:2:Query is satisfied.
+urgency-test013:3:Query is satisfied.
+urgency-test013:4:Query is NOT satisfied.
+urgency-test014:1:Query is satisfied.
+urgency-test014:2:Query is satisfied.
+urgency-test014:3:Query is NOT satisfied.
+urgency-test015:1:Query is satisfied.
+urgency-test015:2:Query is satisfied.
+urgency-test015:3:Query is NOT satisfied.
+urgency-test016:1:Query is satisfied.
+urgency-test016:2:Query is satisfied.
+urgency-test016:3:Query is NOT satisfied.
+urgency-test017:1:Query is satisfied.
+urgency-test017:2:Query is NOT satisfied.
+weighted-test001:1:Query is satisfied.
+weighted-test001:2:Query is satisfied.
+weighted-test001:3:Query is NOT satisfied.
+weighted-test001:4:Query is NOT satisfied.
+weighted-test002:1:Query is satisfied.
+weighted-test003:1:Query is satisfied.
+weighted-test003:2:Query is satisfied.
+weighted-test004:1:Query is NOT satisfied.
+weighted-test004:2:Query is satisfied.
+weighted-test004:3:Query is satisfied.
+weighted-test004:4:Query is NOT satisfied.
+weighted-test004:5:Query is satisfied.
+weighted-test004:6:Query is satisfied.
+workflow-test001:1:Query is satisfied.
+workflow-test002:1:Query is satisfied.
+workflow-test003:1:Query is satisfied.
+workflow-test004:1:Query is satisfied.
+workflow-test005:1:Query is satisfied.
+workflow-test006:1:Query is satisfied.
+workflow-test007:1:Query is satisfied.
+workflow-test008:1:Query is satisfied.
+workflow-test009:1:Query is satisfied.
+workflow-test010:1:Query is satisfied.
+workflow-test010:2:Query is NOT satisfied.
+workflow-test010:3:Query is satisfied.
+workflow-test010:4:Query is satisfied.
+workflow-test010:5:Query is satisfied.
+workflow-test010:6:Query is satisfied.
+workflow-test010:7:Query is satisfied.
+workflow-test011:1:Query is NOT satisfied.
+workflow-test011:2:Query is NOT satisfied.
+workflow-test011:3:Query is satisfied.
+workflow-test011:4:Query is satisfied.
+workflow-test012:1:Query is satisfied.
+workflow-test012:2:Query is NOT satisfied.
+workflow-test012:3:Query is NOT satisfied.
+workflow-test012:4:Query is satisfied.
+workflow-test013:1:Query is satisfied.
+workflow-test013:2:Query is satisfied.
+workflow-test013:3:Query is satisfied.
+workflow-test014:1:Query is satisfied.
+workflow-test014:2:Query is satisfied.
+workflow-test014:3:Query is satisfied.
+workflow-test016:1:Query is satisfied.
+workflow-test016:2:Query is satisfied.
+workflow-test016:3:Query is satisfied.
+workflow-test016:4:Query is NOT satisfied.
+workflow-test016:5:Query is NOT satisfied.
