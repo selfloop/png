@@ -2,10 +2,8 @@
 
 #include <algorithm>
 #include <cstring>
-#include <iostream>
 #include <queue>
 #include <limits>
-#include <utility>
 
 #include "PetriEngine/SuccessorGenerator.h"
 #include "PetriEngine/PQL/Expressions.h"
@@ -19,11 +17,11 @@ namespace PetriNets {
 
   OnTheFlyDG::OnTheFlyDG(PetriEngine::PetriNet *t_net, bool partial_order)
       : encoder(t_net->numberOfPlaces(), 0),
-        edge_alloc(new linked_bucket_t<DependencyGraph::Edge, 1024 * 10>(1)),
+        edge_alloc(new linked_bucket_t<Edge, 1024 * 10>(1)),
         conf_alloc(new linked_bucket_t<char[sizeof(PetriConfig)], 1024 * 1024>(1)),
         _redgen(*t_net),
         _partial_order(partial_order),
-        context(PetriEngine::PQL::DistanceContext(net, query_marking.marking())) {
+        context(DistanceContext(net, query_marking.marking())) {
       net = t_net;
       n_places = t_net->numberOfPlaces();
       n_transitions = t_net->numberOfTransitions();
@@ -41,70 +39,18 @@ namespace PetriNets {
       delete edge_alloc;
   }
 
+  void OnTheFlyDG::cleanUp() {
+      while (!recycle.empty()) {
+          assert(recycle.top()->refcnt == -1);
+          recycle.pop();
+      }
+      // TODO, implement proper cleanup
+  }
+
   Condition::Result OnTheFlyDG::initialEval() {
       initialConfiguration();
       EvaluationContext e(query_marking.marking(), net);
       return query->evaluate(e);
-  }
-
-  Condition::Result OnTheFlyDG::fastEval(Condition *condition, Marking *unfolded) {
-      EvaluationContext e(unfolded->marking(), net);
-      return condition->evaluate(e);
-  }
-
-  std::vector<DependencyGraph::Edge *> OnTheFlyDG::successors(Configuration *config) {
-      context = PetriEngine::PQL::DistanceContext(net, query_marking.marking());
-      petriConfig = dynamic_cast<PetriConfig *>(config);
-      succs = std::vector<Edge *>();
-      trie.unpack(petriConfig->marking, encoder.scratchpad().raw());
-      encoder.decode(query_marking.marking(), encoder.scratchpad().raw());
-      auto query_type = petriConfig->query->getQueryType();
-
-      if (query_type == EVAL) {
-          assert(false);
-      } else if (query_type == LOPERATOR) {
-          if (petriConfig->query->getQuantifier() == NEG) {
-              addSuccessorsForNegation();
-          } else if (petriConfig->query->getQuantifier() == AND) {
-              addSuccessorsForConjunction();
-          } else if (petriConfig->query->getQuantifier() == OR) {
-              addSuccessorsForDisjunction();
-          } else {
-              assert(false && "An unknown error occurred in the loperator-part of the successor generator");
-          }
-      } else if (query_type == PATHQEURY) {
-          if (petriConfig->query->getQuantifier() == A) {
-              if (petriConfig->query->getPath() == U) {
-                  addSuccessorsForAU();
-              } else if (petriConfig->query->getPath() == F) {
-                  addSuccessorsForAF();
-              } else if (petriConfig->query->getPath() == X) {
-                  addSuccessorsForAX();
-              } else if (petriConfig->query->getPath() == G) {
-                  assert(false && "Path operator G had not been translated - Parse error detected in succ()");
-              } else
-                  assert(false && "An unknown error occoured in the successor generator");
-          } else if (petriConfig->query->getQuantifier() == E) {
-              if (petriConfig->query->getPath() == U) {
-                  addSuccessorsForEU();
-              } else if (petriConfig->query->getPath() == F) {
-                  addSuccessorsForEF();
-              } else if (petriConfig->query->getPath() == X) {
-                  addSuccessorsForEX();
-              } else if (petriConfig->query->getPath() == G) {
-                  assert(false && "Path operator G had not been translated - Parse error detected in succ()");
-              } else
-                  assert(false && "An unknown error occoured in the successor generator");
-          }
-      } else {
-          assert(false && "Should never happen");
-      }
-
-      if (succs.size() == 1 && succs[0]->targets.size() == 1) {
-          ((PetriConfig *) succs[0]->targets[0])->owner = petriConfig->owner;
-      }
-
-      return succs;
   }
 
   Configuration *OnTheFlyDG::initialConfiguration() {
@@ -117,31 +63,35 @@ namespace PetriNets {
       return initial_config;
   }
 
-  void OnTheFlyDG::nextStates(Marking &t_marking,
-                              Condition *ptr,
-                              std::function<void()> pre,
-                              std::function<bool(Marking &)> foreach,
-                              const std::function<void()> &post) {
-      bool first = true;
-      memcpy(working_marking.marking(), query_marking.marking(), n_places * sizeof(PetriEngine::MarkVal));
-      auto qf = dynamic_cast<QuantifierCondition *>(ptr);
-      if (!_partial_order || ptr->getQuantifier() != E || ptr->getPath() != F || (*qf)[0]->isTemporal()) {
-          PetriEngine::SuccessorGenerator PNGen(*net);
-          dowork<PetriEngine::SuccessorGenerator>(PNGen, first, pre, foreach);
-      } else {
-          _redgen.setQuery(ptr);
-          dowork<PetriEngine::ReducingSuccessorGenerator>(_redgen, first, pre, foreach);
-      }
-
-      if (!first) post();
+  size_t OnTheFlyDG::configurationCount() const {
+      return _configurationCount;
   }
 
-  void OnTheFlyDG::cleanUp() {
-      while (!recycle.empty()) {
-          assert(recycle.top()->refcnt == -1);
-          recycle.pop();
+  size_t OnTheFlyDG::markingCount() const {
+      return _markingCount;
+  }
+
+  void OnTheFlyDG::markingStats(
+      const uint32_t *marking,
+      size_t &sum,
+      bool &allsame,
+      uint32_t &val,
+      uint32_t &active,
+      uint32_t &last
+  ) const {
+      uint32_t cnt = 0;
+
+      for (uint32_t i = 0; i < n_places; i++) {
+          uint32_t old = val;
+          if (marking[i] != 0) {
+              ++cnt;
+              last = std::max(last, i);
+              val = std::max(marking[i], val);
+              if (old != 0 && marking[i] != old) allsame = false;
+              ++active;
+              sum += marking[i];
+          }
       }
-      // TODO, implement proper cleanup
   }
 
   void OnTheFlyDG::setQuery(const Condition_ptr &query) {
@@ -154,97 +104,68 @@ namespace PetriNets {
       assert(this->query);
   }
 
-  size_t OnTheFlyDG::configurationCount() const {
-      return _configurationCount;
-  }
-
-  size_t OnTheFlyDG::markingCount() const {
-      return _markingCount;
-  }
-
-  PetriConfig *OnTheFlyDG::createConfiguration(size_t marking, size_t own, Condition *t_query) {
-      auto &configs = trie.get_data(marking);
-      for (PetriConfig *c : configs) {
-          if (c->query == t_query)
-              return c;
-      }
-
-      _configurationCount++;
-      size_t id = conf_alloc->next(0);
-      char *mem = (*conf_alloc)[id];
-      auto *newConfig = new(mem) PetriConfig();
-      newConfig->marking = marking;
-      newConfig->query = t_query;
-      newConfig->owner = own;
-      configs.push_back(newConfig);
-      return newConfig;
-  }
-
-  size_t OnTheFlyDG::createMarking(Marking &t_marking) {
-      size_t sum = 0;
-      bool allsame = true;
-      uint32_t val = 0;
-      uint32_t active = 0;
-      uint32_t last = 0;
-      markingStats(t_marking.marking(), sum, allsame, val, active, last);
-      unsigned char type = encoder.getType(sum, active, allsame, val);
-      size_t length = encoder.encode(t_marking.marking(), type);
-      binarywrapper_t w = binarywrapper_t(encoder.scratchpad().raw(), length * 8);
-      auto tit = trie.insert(w.raw(), w.size());
-      if (tit.first) {
-          _markingCount++;
-      }
-
-      return tit.second;
-  }
-
-  void OnTheFlyDG::release(Edge *e) {
-      assert(e->refcnt == 0);
-      e->is_negated = false;
-      e->processed = false;
-      e->source = nullptr;
-      e->targets.clear();
-      e->refcnt = -1;
-      e->handled = false;
-      recycle.push(e);
-  }
-
-  size_t OnTheFlyDG::owner(Marking &marking, Condition *cond) {
+  size_t OnTheFlyDG::owner(Marking &marking, [[maybe_unused]] Condition *cond) {
       // Used for distributed algorithm
       return 0;
   }
 
-  Edge *OnTheFlyDG::newEdge(Configuration &t_source, uint32_t weight) {
-      Edge *e = nullptr;
-      if (recycle.empty()) {
-          size_t n = edge_alloc->next(0);
-          e = &(*edge_alloc)[n];
+  vector<Edge *> OnTheFlyDG::successors(Configuration *config) {
+      context = DistanceContext(net, query_marking.marking());
+      petriConfig = dynamic_cast<PetriConfig *>(config);
+      succs = vector<Edge *>();
+      trie.unpack(petriConfig->marking, encoder.scratchpad().raw());
+      encoder.decode(query_marking.marking(), encoder.scratchpad().raw());
+      auto query_type = petriConfig->query->getQueryType();
+
+      if (LOPERATOR == query_type) {
+          addSuccessorsForStateQuery();
+      } else if (PATHQEURY == query_type) {
+          addSuccessorsForPathQuery();
       } else {
-          e = recycle.top();
-          e->refcnt = 0;
-          recycle.pop();
+          assert(false && "Should never happen");
       }
-      assert(e->targets.empty());
-      e->source = &t_source;
-      e->weight = weight;
-      assert(e->refcnt == 0);
-      ++e->refcnt;
-      return e;
+
+      if (succs.size() == 1 && succs[0]->targets.size() == 1) {
+          ((PetriConfig *) succs[0]->targets[0])->owner = petriConfig->owner;
+      }
+
+      return succs;
   }
 
-  void OnTheFlyDG::markingStats(const uint32_t *marking, size_t &sum,
-                                bool &allsame, uint32_t &val, uint32_t &active, uint32_t &last) {
-      uint32_t cnt = 0;
+  void OnTheFlyDG::addSuccessorsForStateQuery() {
+      switch (petriConfig->query->getQuantifier()) {
+          case NEG: addSuccessorsForNegation();
+              break;
+          case AND: addSuccessorsForConjunction();
+              break;
+          case OR: addSuccessorsForDisjunction();
+              break;
+          default: assert(false && "An unknown error occurred in the loperator-part of the successor generator");
+      }
+  }
 
-      for (uint32_t i = 0; i < n_places; i++) {
-          uint32_t old = val;
-          if (marking[i] != 0) {
-              ++cnt;
-              last = std::max(last, i);
-              val = std::max(marking[i], val);
-              if (old != 0 && marking[i] != old) allsame = false;
-              ++active;
-              sum += marking[i];
+  void OnTheFlyDG::addSuccessorsForPathQuery() {
+      if (petriConfig->query->getQuantifier() == A) {
+          switch (petriConfig->query->getPath()) {
+              case U: addSuccessorsForAU();
+                  break;
+              case F: addSuccessorsForAF();
+                  break;
+              case X: addSuccessorsForAX();
+                  break;
+              case G: assert(false && "Path operator G had not been translated - Parse error detected in succ()");
+              default: assert(false && "An unknown error occoured in the successor generator");
+          }
+      } else if (petriConfig->query->getQuantifier() == E) {
+          switch (petriConfig->query->getPath()) {
+              case X: addSuccessorsForEX();
+                  break;
+              case F: addSuccessorsForEF();
+                  break;
+              case U: addSuccessorsForEU();
+                  break;
+              case G: assert(false && "Path operator G had not been translated - Parse error detected in succ()");
+              default: assert(false && "An unknown error occoured in the successor generator");
           }
       }
   }
@@ -372,7 +293,7 @@ namespace PetriNets {
                            return false;
                        }
                        context.setMarking(mark.marking());
-                       leftEdge->weight = 0;//std::min(leftEdge->weight, /*cond->distance(context)*/0);
+                       leftEdge->weight = 0;
                        Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
                        leftEdge->addTarget(c);
                        return true;
@@ -558,11 +479,11 @@ namespace PetriNets {
 
   void OnTheFlyDG::addSuccessorsForEX() {
       auto cond = dynamic_cast<EXCondition *>(petriConfig->query);
-      auto query = (*cond)[0];
+      auto subQuery = (*cond)[0];
       nextStates(query_marking, cond,
                  noop,
                  [&](Marking &marking) {
-                   auto res = fastEval(query, &marking);
+                   auto res = fastEval(subQuery, &marking);
                    if (res == Condition::RTRUE) {
                        for (auto s : succs) {
                            --s->refcnt;
@@ -575,7 +496,7 @@ namespace PetriNets {
                    else if (res == Condition::RUNKNOWN) {
                        context.setMarking(marking.marking());
                        Edge *e = newEdge(*petriConfig, /*(*cond)[0]->distance(context)*/0);
-                       Configuration *c = createConfiguration(createMarking(marking), petriConfig->owner, query);
+                       Configuration *c = createConfiguration(createMarking(marking), petriConfig->owner, subQuery);
                        e->addTarget(c);
                        succs.push_back(e);
                    }
@@ -583,6 +504,60 @@ namespace PetriNets {
                  },
                  noop
       );
+  }
+
+  PetriConfig *OnTheFlyDG::createConfiguration(size_t marking, size_t own, Condition *t_query) {
+      auto &configs = trie.get_data(marking);
+      for (PetriConfig *c : configs) {
+          if (c->query == t_query)
+              return c;
+      }
+
+      _configurationCount++;
+      size_t id = conf_alloc->next(0);
+      char *mem = (*conf_alloc)[id];
+      auto *newConfig = new(mem) PetriConfig();
+      newConfig->marking = marking;
+      newConfig->query = t_query;
+      newConfig->owner = own;
+      configs.push_back(newConfig);
+      return newConfig;
+  }
+
+  size_t OnTheFlyDG::createMarking(Marking &t_marking) {
+      size_t sum = 0;
+      bool allsame = true;
+      uint32_t val = 0;
+      uint32_t active = 0;
+      uint32_t last = 0;
+      markingStats(t_marking.marking(), sum, allsame, val, active, last);
+      unsigned char type = encoder.getType(sum, active, allsame, val);
+      size_t length = encoder.encode(t_marking.marking(), type);
+      binarywrapper_t w = binarywrapper_t(encoder.scratchpad().raw(), length * 8);
+      auto tit = trie.insert(w.raw(), w.size());
+      if (tit.first) {
+          _markingCount++;
+      }
+
+      return tit.second;
+  }
+
+  Edge *OnTheFlyDG::newEdge(Configuration &t_source, uint32_t weight) {
+      Edge *e;
+      if (recycle.empty()) {
+          size_t n = edge_alloc->next(0);
+          e = &(*edge_alloc)[n];
+      } else {
+          e = recycle.top();
+          e->refcnt = 0;
+          recycle.pop();
+      }
+      assert(e->targets.empty());
+      e->source = &t_source;
+      e->weight = weight;
+      assert(e->refcnt == 0);
+      ++e->refcnt;
+      return e;
   }
 
   bool OnTheFlyDG::fastEvalDisjunctionConditions(
@@ -613,5 +588,42 @@ namespace PetriNets {
           }
       }
       return false;
+  }
+
+  Condition::Result OnTheFlyDG::fastEval(Condition *condition, Marking *unfolded) {
+      EvaluationContext e(unfolded->marking(), net);
+      return condition->evaluate(e);
+  }
+
+  void OnTheFlyDG::nextStates(
+      Marking &t_marking,
+      Condition *ptr,
+      std::function<void()> pre,
+      std::function<bool(Marking &)> foreach,
+      const std::function<void()> &post
+  ) {
+      bool first = true;
+      memcpy(working_marking.marking(), query_marking.marking(), n_places * sizeof(PetriEngine::MarkVal));
+      auto qf = dynamic_cast<QuantifierCondition *>(ptr);
+      if (!_partial_order || ptr->getQuantifier() != E || ptr->getPath() != F || (*qf)[0]->isTemporal()) {
+          PetriEngine::SuccessorGenerator PNGen(*net);
+          dowork<PetriEngine::SuccessorGenerator>(PNGen, first, pre, foreach);
+      } else {
+          _redgen.setQuery(ptr);
+          dowork<PetriEngine::ReducingSuccessorGenerator>(_redgen, first, pre, foreach);
+      }
+
+      if (!first) post();
+  }
+
+  void OnTheFlyDG::release(Edge *e) {
+      assert(e->refcnt == 0);
+      e->is_negated = false;
+      e->processed = false;
+      e->source = nullptr;
+      e->targets.clear();
+      e->refcnt = -1;
+      e->handled = false;
+      recycle.push(e);
   }
 }//PetriNet

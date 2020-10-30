@@ -28,15 +28,15 @@ namespace PetriNets {
       virtual ~OnTheFlyDG();
 
       //Dependency graph interface
-      virtual std::vector<DependencyGraph::Edge *> successors(DependencyGraph::Configuration *config) override;
+      virtual std::vector<Edge *> successors(DependencyGraph::Configuration *config) override;
       virtual DependencyGraph::Configuration *initialConfiguration() override;
       virtual void cleanUp() override;
       void setQuery(const Condition_ptr &query);
 
-      virtual void release(DependencyGraph::Edge *e) override;
+      virtual void release(Edge *e) override;
 
-      size_t owner(Marking &marking, Condition *cond);
-      size_t owner(Marking &marking, const Condition_ptr &cond) {
+      static size_t owner(Marking &marking, [[maybe_unused]] Condition *cond);
+      static size_t owner(Marking &marking, const Condition_ptr &cond) {
           return owner(marking, cond.get());
       }
 
@@ -51,7 +51,7 @@ namespace PetriNets {
       //initialized from constructor
       AlignedEncoder encoder;
       PetriEngine::PetriNet *net = nullptr;
-      PetriConfig *initial_config;
+      PetriConfig *initial_config{};
       Marking working_marking;
       Marking query_marking;
       uint32_t n_transitions = 0;
@@ -94,13 +94,13 @@ namespace PetriNets {
                         bool &allsame,
                         uint32_t &val,
                         uint32_t &active,
-                        uint32_t &last);
+                        uint32_t &last) const;
 
-      DependencyGraph::Edge *newEdge(DependencyGraph::Configuration &t_source, uint32_t weight);
+      Edge *newEdge(DependencyGraph::Configuration &t_source, uint32_t weight);
 
-      std::stack<DependencyGraph::Edge *> recycle;
+      std::stack<Edge *> recycle;
       ptrie::map<ptrie::uchar, std::vector<PetriConfig *> > trie;
-      linked_bucket_t<DependencyGraph::Edge, 1024 * 10> *edge_alloc = nullptr;
+      linked_bucket_t<Edge, 1024 * 10> *edge_alloc = nullptr;
 
       // Problem  with linked bucket and complex constructor
       linked_bucket_t<char[sizeof(PetriConfig)], 1024 * 1024> *conf_alloc = nullptr;
@@ -110,16 +110,9 @@ namespace PetriNets {
 
     private:
       PetriEngine::PQL::DistanceContext context;
-      PetriConfig *petriConfig;
+      PetriConfig *petriConfig{};
       std::vector<Edge *> succs;
 
-      inline bool fastEvalConjunctionConditions(PetriEngine::PQL::AndCondition *condition,
-                                                vector<Condition *> &evaluatedConditions);
-      inline bool fastEvalDisjunctionConditions(PetriEngine::PQL::OrCondition *condition,
-                                                vector<Condition *> &evaluatedConditions);
-      inline bool shortCircuitFastEvalConditions(Condition::Result shortCircuitCondition,
-                                                 PetriEngine::PQL::LogicalCondition *condition,
-                                                 vector<Condition *> &evaluatedConditions);
       inline void addSuccessorsForNegation();
       inline void addSuccessorsForConjunction();
       inline void addSuccessorsForDisjunction();
@@ -129,7 +122,15 @@ namespace PetriNets {
       inline void addSuccessorsForEU();
       inline void addSuccessorsForEF();
       inline void addSuccessorsForEX();
+      inline void addSuccessorsForPathQuery();
+      inline void addSuccessorsForStateQuery();
+      inline bool fastEvalConjunctionConditions(PetriEngine::PQL::AndCondition *condition,
+                                                vector<Condition *> &evaluatedConditions);
+      inline bool fastEvalDisjunctionConditions(PetriEngine::PQL::OrCondition *condition,
+                                                vector<Condition *> &evaluatedConditions);
+      inline bool shortCircuitFastEvalConditions(Condition::Result shortCircuitCondition,
+                                                 PetriEngine::PQL::LogicalCondition *condition,
+                                                 vector<Condition *> &evaluatedConditions);
   };
-
 }
 #endif // ONTHEFLYDG_H
