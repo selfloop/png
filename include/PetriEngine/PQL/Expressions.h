@@ -401,7 +401,7 @@ namespace PetriEngine {
         {
         public:
             virtual bool isTemporal() const override { return true;}
-            CTLType getQueryType() const override { return CTLType::PATHQEURY; }
+            CTLType getQueryType() const override { return CTLType::PATH_QUERY; }
             virtual const Condition_ptr& operator[] (size_t i) const = 0;
         };
         

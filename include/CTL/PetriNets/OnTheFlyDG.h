@@ -121,6 +121,9 @@ namespace PetriNets {
       PetriConfig *petriConfig{};
       std::vector<Edge *> succs;
 
+      inline void addSuccessors();
+      inline void addSuccessorsForPathQuery();
+      inline void addSuccessorsForStateQuery();
       inline void addSuccessorsForNegation();
       inline void addSuccessorsForConjunction();
       inline void addSuccessorsForDisjunction();
@@ -130,8 +133,6 @@ namespace PetriNets {
       inline void addSuccessorsForEU();
       inline void addSuccessorsForEF();
       inline void addSuccessorsForEX();
-      inline void addSuccessorsForPathQuery();
-      inline void addSuccessorsForStateQuery();
       inline bool fastEvalConjunctionConditions(PetriEngine::PQL::AndCondition *condition,
                                                 vector<Condition *> &evaluatedConditions);
       inline bool fastEvalDisjunctionConditions(PetriEngine::PQL::OrCondition *condition,

@@ -19,7 +19,7 @@ namespace PetriNets {
         conf_alloc(new linked_bucket_t<char[sizeof(PetriConfig)], 1024 * 1024>(1)),
         _redgen(*t_net),
         _partial_order(partial_order),
-        context(DistanceContext(net, query_marking.marking())) {
+        context(DistanceContext(t_net, query_marking.marking())) {
       net = t_net;
       n_places = t_net->numberOfPlaces();
       n_transitions = t_net->numberOfTransitions();
@@ -113,21 +113,24 @@ namespace PetriNets {
       succs = vector<Edge *>();
       trie.unpack(petriConfig->marking, encoder.scratchpad().raw());
       encoder.decode(query_marking.marking(), encoder.scratchpad().raw());
-      auto query_type = petriConfig->query->getQueryType();
 
-      if (LOPERATOR == query_type) {
-          addSuccessorsForStateQuery();
-      } else if (PATHQEURY == query_type) {
-          addSuccessorsForPathQuery();
-      } else {
-          assert(false && "Should never happen");
-      }
+      addSuccessors();
 
       if (succs.size() == 1 && succs[0]->targets.size() == 1) {
           ((PetriConfig *) succs[0]->targets[0])->owner = petriConfig->owner;
       }
 
       return succs;
+  }
+
+  void OnTheFlyDG::addSuccessors() {
+      switch (petriConfig->query->getQueryType()) {
+          case LOPERATOR: addSuccessorsForStateQuery();
+              break;
+          case PATH_QUERY: addSuccessorsForPathQuery();
+              break;
+          default: assert(false && "Should never happen");
+      }
   }
 
   void OnTheFlyDG::addSuccessorsForStateQuery() {
@@ -144,7 +147,7 @@ namespace PetriNets {
 
   void OnTheFlyDG::addSuccessorsForPathQuery() {
       if (petriConfig->query->getPath() == G) {
-          assert(false && "Path operator G had not been translated - Parse error detected in succ()");
+          assert(false && "Path operator G had not been translated - Parse error detected in the successor generator");
       } else if (petriConfig->query->getQuantifier() == A) {
           switch (petriConfig->query->getPath()) {
               case U: addSuccessorsForAU();
@@ -180,10 +183,10 @@ namespace PetriNets {
 
   void OnTheFlyDG::addSuccessorsForConjunction() {
       auto cond = dynamic_cast<AndCondition *>(petriConfig->query);
-      // Check if left is false
       vector<Condition *> conditions;
 
-      if (fastEvalConjunctionConditions(cond, conditions)) return;
+      bool leftIsFalse = fastEvalConjunctionConditions(cond, conditions);
+      if (leftIsFalse) return;
 
       Edge *e = newEdge(*petriConfig, 0);
 
@@ -199,10 +202,10 @@ namespace PetriNets {
 
   void OnTheFlyDG::addSuccessorsForDisjunction() {
       auto cond = dynamic_cast<OrCondition *>(petriConfig->query);
-      //Check if left is true
       vector<Condition *> conditions;
 
-      if (fastEvalDisjunctionConditions(cond, conditions)) {
+      bool leftIsTrue = fastEvalDisjunctionConditions(cond, conditions);
+      if (leftIsTrue) {
           succs.push_back(newEdge(*petriConfig, 0));
           return;
       }
