@@ -13,8 +13,6 @@ using namespace PetriEngine::PQL;
 using namespace DependencyGraph;
 
 namespace PetriNets {
-  static void (*const noop)() = []() {};
-
   OnTheFlyDG::OnTheFlyDG(PetriEngine::PetriNet *t_net, bool partial_order)
       : encoder(t_net->numberOfPlaces(), 0),
         edge_alloc(new linked_bucket_t<Edge, 1024 * 10>(1)),
@@ -145,7 +143,9 @@ namespace PetriNets {
   }
 
   void OnTheFlyDG::addSuccessorsForPathQuery() {
-      if (petriConfig->query->getQuantifier() == A) {
+      if (petriConfig->query->getPath() == G) {
+          assert(false && "Path operator G had not been translated - Parse error detected in succ()");
+      } else if (petriConfig->query->getQuantifier() == A) {
           switch (petriConfig->query->getPath()) {
               case U: addSuccessorsForAU();
                   break;
@@ -153,8 +153,7 @@ namespace PetriNets {
                   break;
               case X: addSuccessorsForAX();
                   break;
-              case G: assert(false && "Path operator G had not been translated - Parse error detected in succ()");
-              default: assert(false && "An unknown error occoured in the successor generator");
+              default: assert(false && "An unknown error occurred in the successor generator");
           }
       } else if (petriConfig->query->getQuantifier() == E) {
           switch (petriConfig->query->getPath()) {
@@ -164,8 +163,7 @@ namespace PetriNets {
                   break;
               case U: addSuccessorsForEU();
                   break;
-              case G: assert(false && "Path operator G had not been translated - Parse error detected in succ()");
-              default: assert(false && "An unknown error occoured in the successor generator");
+              default: assert(false && "An unknown error occurred in the successor generator");
           }
       }
   }
@@ -225,7 +223,6 @@ namespace PetriNets {
       Edge *e = newEdge(*petriConfig, numeric_limits<uint32_t>::max());
       Condition::Result allValid = Condition::RTRUE;
       nextStates(query_marking, cond,
-                 noop,
                  [&](Marking &mark) {
                    auto res = fastEval((*cond)[0], &mark);
                    if (res != Condition::RUNKNOWN) {
@@ -241,8 +238,7 @@ namespace PetriNets {
                        e->addTarget(c);
                    }
                    return true;
-                 },
-                 noop
+                 }
       );
       if (allValid == Condition::RUNKNOWN) {
           succs.push_back(e);
@@ -420,7 +416,7 @@ namespace PetriNets {
                    }
                    succs.push_back(e);
                    return true;
-                 }, noop);
+                 }, NOOP_FUNCTION);
 
       if (right != nullptr) {
           succs.push_back(right);
@@ -444,7 +440,6 @@ namespace PetriNets {
       }
 
       nextStates(query_marking, cond,
-                 noop,
                  [&](Marking &mark) {
                    auto res = fastEval(cond, &mark);
                    if (res == Condition::RFALSE) return true;
@@ -468,8 +463,7 @@ namespace PetriNets {
                    e->addTarget(c);
                    succs.push_back(e);
                    return true;
-                 },
-                 noop
+                 }
       );
 
       if (subquery != nullptr) {
@@ -481,7 +475,6 @@ namespace PetriNets {
       auto cond = dynamic_cast<EXCondition *>(petriConfig->query);
       auto subQuery = (*cond)[0];
       nextStates(query_marking, cond,
-                 noop,
                  [&](Marking &marking) {
                    auto res = fastEval(subQuery, &marking);
                    if (res == Condition::RTRUE) {
@@ -501,8 +494,7 @@ namespace PetriNets {
                        succs.push_back(e);
                    }
                    return true;
-                 },
-                 noop
+                 }
       );
   }
 

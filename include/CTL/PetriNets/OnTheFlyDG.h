@@ -1,8 +1,10 @@
 #ifndef ONTHEFLYDG_H
 #define ONTHEFLYDG_H
 
+#define NOOP_FUNCTION []() {}
 #include <functional>
 #include <stack>
+#include <utility>
 #include <ptrie/ptrie_map.h>
 #include <PetriEngine/PQL/Expressions.h>
 
@@ -18,6 +20,7 @@
 
 namespace PetriNets {
   class OnTheFlyDG : public DependencyGraph::BasicDependencyGraph {
+
     public:
       using Edge = DependencyGraph::Edge;
       using Condition = PetriEngine::PQL::Condition;
@@ -69,6 +72,11 @@ namespace PetriNets {
                       std::function<void()> pre,
                       std::function<bool(Marking &)> foreach,
                       const std::function<void()> &post);
+
+      void nextStates(Marking &t_marking, Condition *cond, std::function<bool(Marking &)> foreach) {
+          nextStates(t_marking, cond, NOOP_FUNCTION, std::move(foreach), NOOP_FUNCTION);
+      }
+
       template<typename T>
       void dowork(T &gen, bool &first,
                   std::function<void()> &pre,
