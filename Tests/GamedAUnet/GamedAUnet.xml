@@ -3,8 +3,8 @@
     <place id="P0" initialMarking="1" invariant="&lt; inf" name="P0"/>
     <place id="P1" initialMarking="0" invariant="&lt; inf" name="P1"/>
     <place id="P2" initialMarking="0" invariant="&lt; inf" name="P2"/>
-    <transition id="T0" name="T0"/>
-    <transition id="T1" name="T1"/>
+    <transition id="T0" name="T0" player="0"/>
+    <transition id="T1" name="T1" player="0"/>
     <inputarc inscription="[0,inf)" source="P0" target="T0"/>
     <inputarc inscription="[0,inf)" source="P0" target="T1"/>
     <outputarc inscription="1" source="T0" target="P1"/>
