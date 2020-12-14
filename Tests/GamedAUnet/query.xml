@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<property-set xmlns="http://tapaal.net/">
+	<property>
+		<id>GamedAUnet-test001.TRUE-1</id>
+		<description>GamedAUnet-test001.TRUE-1</description>
+		<formula>
+			<all-paths>
+				<until>
+					<before>
+						<integer-ge>
+							<tokens-count>
+								<place>P0</place>
+							</tokens-count>
+							<integer-constant>1</integer-constant>
+						</integer-ge>
+					</before> 
+					<reach>
+						<integer-ge>
+							<tokens-count>
+								<place>P1</place>
+							</tokens-count>
+							<integer-constant>1</integer-constant>
+						</integer-ge>
+					</reach>
+				</until>
+			</all-paths>
+		</formula>
+	</property>
+</property-set>
