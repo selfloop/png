@@ -33,8 +33,8 @@ namespace PetriEngine {
     }
 
     void SuccessorGenerator::reset() {
-        _suc_pcounter = 0;
-        _suc_tcounter = std::numeric_limits<uint32_t>::max();
+        _successorPlaceCounter = 0;
+        _succesorTransitionCounter = std::numeric_limits<uint32_t>::max();
     }
 
     void SuccessorGenerator::consumePreset(Structures::State& write, uint32_t t) {
@@ -87,27 +87,27 @@ namespace PetriEngine {
     }
 
     bool SuccessorGenerator::next(Structures::State& write, PetriNet::player_t player) {
-        for (; _suc_pcounter < _net._nplaces; ++_suc_pcounter) {
+        for (; _successorPlaceCounter < _net._nplaces; ++_successorPlaceCounter) {
             // orphans are currently under "place 0" as a special case
-            if (_suc_pcounter == 0 || (*_parent).marking()[_suc_pcounter] > 0) {
-                if (_suc_tcounter == std::numeric_limits<uint32_t>::max()) {
-                    _suc_tcounter = _net._placeToPtrs[_suc_pcounter];
+            if (_successorPlaceCounter == 0 || (*_parent).marking()[_successorPlaceCounter] > 0) {
+                if (_succesorTransitionCounter == std::numeric_limits<uint32_t>::max()) {
+                    _succesorTransitionCounter = _net._placeToPtrs[_successorPlaceCounter];
                 }
-                uint32_t last = _net._placeToPtrs[_suc_pcounter + 1];
-                for (; _suc_tcounter != last; ++_suc_tcounter) {
-                    if (_is_game && !_net.ownedBy(_suc_tcounter, player))
+                uint32_t last = _net._placeToPtrs[_successorPlaceCounter + 1];
+                for (; _succesorTransitionCounter != last; ++_succesorTransitionCounter) {
+                    if (_is_game && !_net.ownedBy(_succesorTransitionCounter, player))
                         continue;
-                    if (!checkPreset(_suc_tcounter)) continue;
+                    if (!checkPreset(_succesorTransitionCounter)) continue;
                     memcpy(write.marking(), (*_parent).marking(), _net._nplaces * sizeof (MarkVal));
-                    consumePreset(write, _suc_tcounter);
-                    producePostset(write, _suc_tcounter);
+                    consumePreset(write, _succesorTransitionCounter);
+                    producePostset(write, _succesorTransitionCounter);
 
-                    ++_suc_tcounter;
+                    ++_succesorTransitionCounter;
                     return true;
                 }
-                _suc_tcounter = std::numeric_limits<uint32_t>::max();
+                _succesorTransitionCounter = std::numeric_limits<uint32_t>::max();
             }
-            _suc_tcounter = std::numeric_limits<uint32_t>::max();
+            _succesorTransitionCounter = std::numeric_limits<uint32_t>::max();
         }
         reset();
         return false;

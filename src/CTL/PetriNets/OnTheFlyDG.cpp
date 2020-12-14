@@ -277,8 +277,8 @@ namespace PetriNets {
           //left side is temporal, include it in the edge
           left = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[0]);
       }
+      //if left side is guaranteed to be not satisfied, skip successor generation
       if (valid || left != nullptr) {
-          //if left side is guaranteed to be not satisfied, skip successor generation
           Edge *leftEdge = nullptr;
           nextStates(query_marking, cond,
                      [&]() { leftEdge = newEdge(*petriConfig, numeric_limits<uint32_t>::max()); },

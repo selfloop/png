@@ -28,7 +28,7 @@ public:
     bool next(Structures::State& write,  PetriNet::player_t player = PetriNet::ANY);
     uint32_t fired()
     {
-        return _suc_tcounter -1;
+        return _succesorTransitionCounter - 1;
     }
         
     const MarkVal* parent() const {
@@ -63,8 +63,8 @@ public:
 private:
     const PetriNet& _net;
     const Structures::State* _parent;
-    uint32_t _suc_pcounter;
-    uint32_t _suc_tcounter;
+    uint32_t _successorPlaceCounter;
+    uint32_t _succesorTransitionCounter;
     bool _is_game = false;
 
     friend class ReducingSuccessorGenerator;

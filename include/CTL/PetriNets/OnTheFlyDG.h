@@ -78,9 +78,7 @@ namespace PetriNets {
       }
 
       template<typename T>
-      void dowork(T &gen, bool &first,
-                  std::function<void()> &pre,
-                  std::function<bool(Marking &)> &foreach) {
+      void dowork(T &gen, bool &first, std::function<void()> &pre, std::function<bool(Marking &)> &foreach) {
           gen.prepare(&query_marking);
 
           while (gen.next(working_marking)) {
@@ -92,6 +90,7 @@ namespace PetriNets {
               }
           }
       }
+
       PetriConfig *createConfiguration(size_t marking, size_t own, Condition *query);
       PetriConfig *createConfiguration(size_t marking, size_t own, const Condition_ptr &query) {
           return createConfiguration(marking, own, query.get());
