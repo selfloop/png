@@ -55,7 +55,7 @@ namespace PetriEngine {
         PetriNet* makePetriNet(bool reorder = true);
         /** Make the resulting initial marking, you take ownership */
 
-        MarkVal const * initMarking()
+        MarkingValue const * initMarking()
         {
             return initialMarking.data();
         }
@@ -137,7 +137,7 @@ namespace PetriEngine {
         std::vector<Transition> _transitions;
         std::vector<Place> _places;
         
-        std::vector<MarkVal> initialMarking;
+        std::vector<MarkingValue> initialMarking;
         Reducer reducer;
     };
 

@@ -467,7 +467,7 @@ namespace PetriEngine {
             
             // set up working area
             Structures::State state;
-            state.setMarking(_net.makeInitialMarking());
+            state.setMarking(_net.copyInitialMarking());
             
             // check initial marking
             if(checkQueries(queries, results, state, true))

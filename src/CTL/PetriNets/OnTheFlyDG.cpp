@@ -53,10 +53,10 @@ namespace PetriNets {
 
   Configuration *OnTheFlyDG::initialConfiguration() {
       if (working_marking.marking() == nullptr) {
-          working_marking.setMarking(net->makeInitialMarking());
-          query_marking.setMarking(net->makeInitialMarking());
-          auto o = owner(working_marking, this->query);
-          initial_config = createConfiguration(createMarking(working_marking), o, this->query);
+          working_marking.setMarking(net->copyInitialMarking());
+          query_marking.setMarking(net->copyInitialMarking());
+          auto pwner = owner(working_marking, this->query);
+          initial_config = createConfiguration(createMarking(working_marking), pwner, this->query);
       }
       return initial_config;
   }
@@ -236,7 +236,7 @@ namespace PetriNets {
                    } else {
                        allValid = Condition::RUNKNOWN;
                        context.setMarking(mark.marking());
-                       e->weight = 0;//std::min(e->weight, /*cond->distance(context)*/0);
+                       e->weight = 0;
                        Configuration *c = createConfiguration(createMarking(mark), petriConfig->owner, (*cond)[0]);
                        e->addTarget(c);
                    }
@@ -501,10 +501,10 @@ namespace PetriNets {
       );
   }
 
-  PetriConfig *OnTheFlyDG::createConfiguration(size_t marking, size_t own, Condition *t_query) {
+  PetriConfig *OnTheFlyDG::createConfiguration(size_t marking, size_t own, Condition *queryPointer) {
       auto &configs = trie.get_data(marking);
       for (PetriConfig *c : configs) {
-          if (c->query == t_query)
+          if (c->query == queryPointer)
               return c;
       }
 
@@ -513,7 +513,7 @@ namespace PetriNets {
       char *mem = (*conf_alloc)[id];
       auto *newConfig = new(mem) PetriConfig();
       newConfig->marking = marking;
-      newConfig->query = t_query;
+      newConfig->query = queryPointer;
       newConfig->owner = own;
       configs.push_back(newConfig);
       return newConfig;
@@ -598,7 +598,7 @@ namespace PetriNets {
       const std::function<void()> &post
   ) {
       bool first = true;
-      memcpy(working_marking.marking(), query_marking.marking(), n_places * sizeof(PetriEngine::MarkVal));
+      memcpy(working_marking.marking(), query_marking.marking(), n_places * sizeof(PetriEngine::MarkingValue));
       auto qf = dynamic_cast<QuantifierCondition *>(ptr);
       if (!_partial_order || ptr->getQuantifier() != E || ptr->getPath() != F || (*qf)[0]->isTemporal()) {
           PetriEngine::SuccessorGenerator PNGen(*net);

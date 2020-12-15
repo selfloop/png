@@ -26,7 +26,7 @@ namespace PetriEngine
     using namespace PQL;
     class RangeContext : public Visitor {
     public:
-        RangeContext(prvector_t& vector, MarkVal* base, const PetriNet& net, const uint64_t* uses, MarkVal* marking, const std::vector<bool>& dirty);
+        RangeContext(prvector_t& vector, MarkingValue* base, const PetriNet& net, const uint64_t* uses, MarkingValue* marking, const std::vector<bool>& dirty);
         bool is_dirty() const { return _is_dirty; }
                 
     private:
@@ -34,12 +34,12 @@ namespace PetriEngine
         void handle_compare(const Expr_ptr& left, const Expr_ptr& right, bool strict);
                 
         prvector_t& _ranges;
-        MarkVal* _base;
+        MarkingValue* _base;
         const PetriNet& _net;
         const uint64_t* _uses;
         int64_t _limit = 0;
         bool _lt = false;
-        MarkVal* _marking;
+        MarkingValue* _marking;
         bool _is_dirty = false;
         const std::vector<bool>& _dirty;
     protected:

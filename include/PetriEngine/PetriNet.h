@@ -50,10 +50,10 @@ namespace PetriEngine {
         bool inhibitor;
         int8_t direction;
         // we can pack things here, but might give slowdown
-    } /*__attribute__((packed))*/; 
+    };
     
     /** Type used for holding markings values */
-    typedef uint32_t MarkVal;
+    typedef uint32_t MarkingValue;
 
     /** Efficient representation of PetriNet */
     class PetriNet {
@@ -64,20 +64,20 @@ namespace PetriEngine {
         ~PetriNet();
 
         uint32_t initial(size_t id) const;
-        MarkVal* makeInitialMarking() const;
+        MarkingValue* copyInitialMarking() const;
         /** Fire transition if possible and store result in result */
-        bool deadlocked(const MarkVal* marking) const;
-        bool fireable(const MarkVal* marking, int transitionIndex);
+        bool deadlocked(const MarkingValue* marking) const;
+        bool fireable(const MarkingValue* marking, int transitionIndex);
         std::pair<const Invariant*, const Invariant*> preset(uint32_t id) const;
         std::pair<const Invariant*, const Invariant*> postset(uint32_t id) const;
         bool ownedBy(uint32_t t, player_t p) const;
         player_t owner(uint32_t t) const { return _players[t]; }
         uint32_t numberOfTransitions() const {
-            return _ntransitions;
+            return _numberOfTransitions;
         }
 
         uint32_t numberOfPlaces() const {
-            return _nplaces;
+            return _numberOfPlaces;
         }
         int inArc(uint32_t place, uint32_t transition) const;
         int outArc(uint32_t transition, uint32_t place) const;
@@ -93,9 +93,9 @@ namespace PetriEngine {
             return _placenames;
         }
                
-        void print(MarkVal const * const val) const
+        void print(MarkingValue const * const val) const
         {
-            for(size_t i = 0; i < _nplaces; ++i)
+            for(size_t i = 0; i < _numberOfPlaces; ++i)
             {
                 if(val[i] != 0)
                 {
@@ -113,7 +113,7 @@ namespace PetriEngine {
         static constexpr player_t ENV = 2;
         static constexpr player_t ANY = CTRL | ENV;
         
-        const MarkVal* initial() const {
+        const MarkingValue* initial() const {
             return _initialMarking;
         }
 
@@ -123,14 +123,14 @@ namespace PetriEngine {
          * @remarks We could also get this from the _places vector, but I don't see any
          * any complexity garentees for this type.
          */
-        uint32_t _ninvariants, _ntransitions, _nplaces;
+        uint32_t _numberOfInvariants, _numberOfTransitions, _numberOfPlaces;
 
         // transitions to players. To avoid overhead during normal verification.
         std::vector<uint8_t> _players; // bool for now (ctrl==1, unctrl=2)
         std::vector<TransPtr> _transitions;
         std::vector<Invariant> _invariants;
         std::vector<uint32_t> _placeToPtrs;
-        MarkVal* _initialMarking;
+        MarkingValue* _initialMarking;
 
         std::vector<std::string> _transitionnames;
         std::vector<std::string> _placenames;

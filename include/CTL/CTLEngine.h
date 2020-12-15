@@ -11,12 +11,12 @@
 #include <set>
 
 ReturnValue CTLMain(PetriEngine::PetriNet* net,
-                    CTL::CTLAlgorithmType algorithmtype,
-                    PetriEngine::Reachability::Strategy strategytype,
+                    CTL::CTLAlgorithmType algorithmType,
+                    PetriEngine::Reachability::Strategy strategyType,
                     bool gamemode,
-                    bool printstatistics,
-                    bool mccoutput,
-                    bool partial_order,
+                    bool printStatistics,
+                    bool mccOutput,
+                    bool isPartialOrder,
                     const std::vector<std::string>& querynames,
                     const std::vector<std::shared_ptr<PetriEngine::PQL::Condition>>& reducedQueries,
                     const std::vector<size_t>& ids,

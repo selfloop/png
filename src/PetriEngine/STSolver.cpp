@@ -6,7 +6,7 @@ namespace PetriEngine {
     
     STSolver::STSolver(Reachability::ResultPrinter& printer, const PetriNet& net, PQL::Condition * query, uint32_t depth) : printer(printer), _query(query), _net(net){
         if(depth == 0){
-            _siphonDepth = _net._nplaces;
+            _siphonDepth = _net._numberOfPlaces;
         } else {
             _siphonDepth = depth;
         }
@@ -222,8 +222,8 @@ namespace PetriEngine {
     // TODO: Refactor this out... Copy paste from ReducingSuccessorGenerator.cpp
     // Also, we dont need the preset here.
     void STSolver::constructPrePost() {
-        std::vector<std::pair<std::vector<uint32_t>, std::vector < uint32_t>>> tmp_places(_net._nplaces);
-        for (uint32_t t = 0; t < _net._ntransitions; t++) {
+        std::vector<std::pair<std::vector<uint32_t>, std::vector < uint32_t>>> tmp_places(_net._numberOfPlaces);
+        for (uint32_t t = 0; t < _net._numberOfTransitions; t++) {
             const TransPtr& ptr = _net._transitions[t];
             uint32_t finv = ptr.inputs;
             uint32_t linv = ptr.outputs;
@@ -245,10 +245,10 @@ namespace PetriEngine {
         }
         _transitions = std::make_unique<uint32_t[]>(ntrans);
 
-        _places = std::make_unique<place_t[]>(_net._nplaces + 1);
+        _places = std::make_unique<place_t[]>(_net._numberOfPlaces + 1);
         uint32_t offset = 0;
         uint32_t p = 0;
-        for (; p < _net._nplaces; ++p) {
+        for (; p < _net._numberOfPlaces; ++p) {
             std::vector<uint32_t>& pre = tmp_places[p].first;
             std::vector<uint32_t>& post = tmp_places[p].second;
 

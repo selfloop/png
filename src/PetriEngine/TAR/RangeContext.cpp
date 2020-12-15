@@ -14,7 +14,7 @@
 namespace PetriEngine {
     using namespace PQL;
    
-    RangeContext::RangeContext(prvector_t& vector, MarkVal* base, const PetriNet& net, const uint64_t* uses, MarkVal* marking, const std::vector<bool>& dirty)
+    RangeContext::RangeContext(prvector_t& vector, MarkingValue* base, const PetriNet& net, const uint64_t* uses, MarkingValue* marking, const std::vector<bool>& dirty)
     : _ranges(vector), _base(base), _net(net), _uses(uses), _marking(marking), _dirty(dirty)
     {
     }

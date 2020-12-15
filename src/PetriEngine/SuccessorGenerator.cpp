@@ -38,7 +38,6 @@ namespace PetriEngine {
     }
 
     void SuccessorGenerator::consumePreset(Structures::State& write, uint32_t t) {
-
         const TransPtr& ptr = _net._transitions[t];
         uint32_t finv = ptr.inputs;
         uint32_t linv = ptr.outputs;
@@ -50,8 +49,8 @@ namespace PetriEngine {
         }
     }
 
-    bool SuccessorGenerator::checkPreset(uint32_t t) {
-        const TransPtr& ptr = _net._transitions[t];
+    bool SuccessorGenerator::checkIfPresetEnablesTransition(uint32_t transition) {
+        const TransPtr& ptr = _net._transitions[transition];
         uint32_t finv = ptr.inputs;
         uint32_t linv = ptr.outputs;
 
@@ -87,18 +86,18 @@ namespace PetriEngine {
     }
 
     bool SuccessorGenerator::next(Structures::State& write, PetriNet::player_t player) {
-        for (; _successorPlaceCounter < _net._nplaces; ++_successorPlaceCounter) {
+        for (; _successorPlaceCounter < _net._numberOfPlaces; ++_successorPlaceCounter) {
             // orphans are currently under "place 0" as a special case
             if (_successorPlaceCounter == 0 || (*_parent).marking()[_successorPlaceCounter] > 0) {
                 if (_succesorTransitionCounter == std::numeric_limits<uint32_t>::max()) {
                     _succesorTransitionCounter = _net._placeToPtrs[_successorPlaceCounter];
                 }
-                uint32_t last = _net._placeToPtrs[_successorPlaceCounter + 1];
-                for (; _succesorTransitionCounter != last; ++_succesorTransitionCounter) {
+                uint32_t limit = _net._placeToPtrs[_successorPlaceCounter + 1];
+                for (; _succesorTransitionCounter != limit; ++_succesorTransitionCounter) {
                     if (_is_game && !_net.ownedBy(_succesorTransitionCounter, player))
                         continue;
-                    if (!checkPreset(_succesorTransitionCounter)) continue;
-                    memcpy(write.marking(), (*_parent).marking(), _net._nplaces * sizeof (MarkVal));
+                    if (!checkIfPresetEnablesTransition(_succesorTransitionCounter)) continue;
+                    memcpy(write.marking(), (*_parent).marking(), _net._numberOfPlaces * sizeof (MarkingValue));
                     consumePreset(write, _succesorTransitionCounter);
                     producePostset(write, _succesorTransitionCounter);
 

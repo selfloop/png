@@ -27,7 +27,7 @@ namespace PetriEngine {
         public:
             using inter_t = std::pair<prvector_t, size_t>;
             using interpolant_t = std::vector<inter_t>;
-            Solver(PetriNet& net, MarkVal* initial, Condition* query, std::vector<bool>& inq);
+            Solver(PetriNet& net, MarkingValue* initial, Condition* query, std::vector<bool>& inq);
             bool check(trace_t& trace, TraceSet& interpolants);
             const std::vector<bool>& in_query() const { return _inq; }
             Condition* query() const { return _query; }
@@ -37,13 +37,13 @@ namespace PetriEngine {
             bool computeHoare(trace_t& trace, interpolant_t& ranges, int64_t fail);
             bool computeTerminal(state_t& end, inter_t& last);
             PetriNet& _net;
-            MarkVal* _initial;
+            MarkingValue* _initial;
             Condition* _query;
             std::vector<bool> _inq;
             std::vector<bool> _dirty;
             std::unique_ptr<int64_t[]> _m;
             std::unique_ptr<int64_t[]> _failm;
-            std::unique_ptr<MarkVal[]> _mark;
+            std::unique_ptr<MarkingValue[]> _mark;
             std::unique_ptr<uint64_t[]> _use_count;
 #ifndef NDEBUG
             SuccessorGenerator _gen;

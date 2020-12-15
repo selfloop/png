@@ -95,16 +95,16 @@ void Algorithm::LocalFPA::explore(DependencyGraph::Configuration *c)
 {
     assert(c->assignment == DependencyGraph::UNKNOWN);
     c->assignment = DependencyGraph::ZERO;
-    auto succs = graph->successors(c);
+    auto successors = graph->successors(c);
 
-    for (DependencyGraph::Edge *succ : succs) {
-        strategy->pushEdge(succ);
-        --succ->refcnt;
-        if(succ->refcnt == 0) graph->release(succ);
+    for (DependencyGraph::Edge *successor : successors) {
+        strategy->pushEdge(successor);
+        successor->refcnt -= 1;
+        if(successor->refcnt == 0) graph->release(successor);
     }
 
     _exploredConfigurations += 1;
-    _numberOfEdges += succs.size();
+    _numberOfEdges += successors.size();
 }
 
 void Algorithm::LocalFPA::addDependency(DependencyGraph::Edge *e, DependencyGraph::Configuration *target)

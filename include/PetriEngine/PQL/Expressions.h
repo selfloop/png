@@ -1175,7 +1175,7 @@ namespace PetriEngine {
                 return _places.size();
             }
             void analyze(AnalysisContext& context) override;
-            size_t value(const MarkVal*);
+            size_t value(const MarkingValue*);
             Result evaluate(const EvaluationContext& context) override;
             Result evalAndSet(const EvaluationContext& context) override;
             void visit(Visitor&) const override;

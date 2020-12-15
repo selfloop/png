@@ -111,9 +111,9 @@ namespace PetriEngine {
             // set up working area
             Structures::State state;
             Structures::State working;
-            _initial.setMarking(_net.makeInitialMarking());
-            state.setMarking(_net.makeInitialMarking());
-            working.setMarking(_net.makeInitialMarking());
+            _initial.setMarking(_net.copyInitialMarking());
+            state.setMarking(_net.copyInitialMarking());
+            working.setMarking(_net.copyInitialMarking());
             
             W states(_net, _kbound);    // stateset
             Q queue(&states);           // working queue

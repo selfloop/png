@@ -7,8 +7,8 @@
 #include <string>
 
 struct CTLResult {
-    CTLResult(const PetriEngine::PQL::Condition_ptr& qry){
-        query = qry;
+    CTLResult(const PetriEngine::PQL::Condition_ptr& query){
+        this->query = query;
     }
 
     PetriEngine::PQL::Condition_ptr query;

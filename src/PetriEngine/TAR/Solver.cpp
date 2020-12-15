@@ -22,7 +22,7 @@
 namespace PetriEngine {
     namespace Reachability {
         using namespace PQL;
-        Solver::Solver(PetriNet& net, MarkVal* initial, Condition* query, std::vector<bool>& inq)
+        Solver::Solver(PetriNet& net, MarkingValue* initial, Condition* query, std::vector<bool>& inq)
         : _net(net), _initial(initial), _query(query), _inq(inq) 
 #ifndef NDEBUG
         , _gen(_net)
@@ -31,7 +31,7 @@ namespace PetriEngine {
             _dirty.resize(_net.numberOfPlaces());
             _m = std::make_unique<int64_t[]>(_net.numberOfPlaces());
             _failm = std::make_unique<int64_t[]>(_net.numberOfPlaces());
-            _mark = std::make_unique<MarkVal[]>(_net.numberOfPlaces());    
+            _mark = std::make_unique<MarkingValue[]>(_net.numberOfPlaces());
             _use_count = std::make_unique<uint64_t[]>(_net.numberOfPlaces());
             for(size_t p = 0; p < _net.numberOfPlaces(); ++p)
                 if(inq[p])
@@ -309,7 +309,7 @@ namespace PetriEngine {
                                     auto otherr = _query->evalAndSet(ctx);
                                     assert(otherr == r);
                                 }
-                                else if(_gen.checkPreset(t.get_edge_cnt()-1))
+                                else if(_gen.checkIfPresetEnablesTransition(t.get_edge_cnt() - 1))
                                 {
                                     _gen.consumePreset(s, t.get_edge_cnt()-1);
                                     

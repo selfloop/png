@@ -31,7 +31,7 @@ public:
         return _succesorTransitionCounter - 1;
     }
         
-    const MarkVal* parent() const {
+    const MarkingValue* parent() const {
         return _parent->marking();
     }
 
@@ -40,11 +40,11 @@ public:
     /**
      * Checks if the conditions are met for fireing t, if write != NULL,
      * then also consumes tokens from write while checking
-     * @param t, transition to fire
+     * @param transition, transition to fire
      * @param write, marking to consume from (possibly NULL)
      * @return true if t is fireable, false otherwise
      */
-    bool checkPreset(uint32_t t);
+    bool checkIfPresetEnablesTransition(uint32_t transition);
 
     /**
      * Consumes tokens in preset of t without from marking write checking

@@ -5,11 +5,11 @@
 
 namespace PetriEngine {
 
-    ReducingSuccessorGenerator::ReducingSuccessorGenerator(const PetriNet& net) : SuccessorGenerator(net), _inhibpost(net._nplaces){
+    ReducingSuccessorGenerator::ReducingSuccessorGenerator(const PetriNet& net) : SuccessorGenerator(net), _inhibpost(net._numberOfPlaces){
         _current = 0;
-        _enabled = std::make_unique<bool[]>(net._ntransitions);
-        _stubborn = std::make_unique<bool[]>(net._ntransitions);
-        _dependency = std::make_unique<uint32_t[]>(net._ntransitions);
+        _enabled = std::make_unique<bool[]>(net._numberOfTransitions);
+        _stubborn = std::make_unique<bool[]>(net._numberOfTransitions);
+        _dependency = std::make_unique<uint32_t[]>(net._numberOfTransitions);
         _places_seen = std::make_unique<uint8_t[]>(_net.numberOfPlaces());
         reset();
         constructPrePost();
@@ -28,7 +28,7 @@ namespace PetriEngine {
     
     void ReducingSuccessorGenerator::checkForInhibitor(){
         _netContainsInhibitorArcs=false;
-        for (uint32_t t = 0; t < _net._ntransitions; t++) {
+        for (uint32_t t = 0; t < _net._numberOfTransitions; t++) {
             const TransPtr& ptr = _net._transitions[t];
             uint32_t finv = ptr.inputs;
             uint32_t linv = ptr.outputs;
@@ -42,9 +42,9 @@ namespace PetriEngine {
     }
 
     void ReducingSuccessorGenerator::constructPrePost() {
-        std::vector<std::pair<std::vector<trans_t>, std::vector < trans_t>>> tmp_places(_net._nplaces);
+        std::vector<std::pair<std::vector<trans_t>, std::vector < trans_t>>> tmp_places(_net._numberOfPlaces);
                 
-        for (uint32_t t = 0; t < _net._ntransitions; t++) {
+        for (uint32_t t = 0; t < _net._numberOfTransitions; t++) {
             const TransPtr& ptr = _net._transitions[t];
             uint32_t finv = ptr.inputs;
             uint32_t linv = ptr.outputs;
@@ -72,10 +72,10 @@ namespace PetriEngine {
         }
         _transitions.reset(new trans_t[ntrans]);
 
-        _places.reset(new place_t[_net._nplaces + 1]);
+        _places.reset(new place_t[_net._numberOfPlaces + 1]);
         uint32_t offset = 0;
         uint32_t p = 0;
-        for (; p < _net._nplaces; ++p) {
+        for (; p < _net._numberOfPlaces; ++p) {
             auto& pre = tmp_places[p].first;
             auto& post = tmp_places[p].second;
 
@@ -102,9 +102,9 @@ namespace PetriEngine {
     }
 
     void ReducingSuccessorGenerator::constructDependency() {
-        memset(_dependency.get(), 0, sizeof(uint32_t) * _net._ntransitions);
+        memset(_dependency.get(), 0, sizeof(uint32_t) * _net._numberOfTransitions);
 
-        for (uint32_t t = 0; t < _net._ntransitions; t++) {
+        for (uint32_t t = 0; t < _net._numberOfTransitions; t++) {
             uint32_t finv = _net._transitions[t].inputs;
             uint32_t linv = _net._transitions[t].outputs;
 
@@ -122,14 +122,14 @@ namespace PetriEngine {
 
     void ReducingSuccessorGenerator::constructEnabled() {
         _ordering.clear();
-        for (uint32_t p = 0; p < _net._nplaces; ++p) {
+        for (uint32_t p = 0; p < _net._numberOfPlaces; ++p) {
             // orphans are currently under "place 0" as a special case
             if (p == 0 || (*_parent).marking()[p] > 0) { 
                 uint32_t t = _net._placeToPtrs[p];
                 uint32_t last = _net._placeToPtrs[p + 1];
 
                 for (; t != last; ++t) {
-                    if (!checkPreset(t)) continue;
+                    if (!checkIfPresetEnablesTransition(t)) continue;
                     _enabled[t] = true;
                     _ordering.push_back(t);
                 }
@@ -282,7 +282,7 @@ namespace PetriEngine {
             _ordering.pop_front();
             if (_stubborn[_current]) {
                 assert(_enabled[_current]);
-                memcpy(write.marking(), (*_parent).marking(), _net._nplaces*sizeof(MarkVal));
+                memcpy(write.marking(), (*_parent).marking(), _net._numberOfPlaces * sizeof(MarkingValue));
                 consumePreset(write, _current);
                 producePostset(write, _current);
                 return true;
@@ -295,7 +295,7 @@ namespace PetriEngine {
     uint32_t ReducingSuccessorGenerator::leastDependentEnabled() {
         uint32_t tLeast = -1;
         bool foundLeast = false;
-        for (uint32_t t = 0; t < _net._ntransitions; t++) {
+        for (uint32_t t = 0; t < _net._numberOfTransitions; t++) {
             if (_enabled[t]) {
                 if (!foundLeast) {
                     tLeast = t;
@@ -312,7 +312,7 @@ namespace PetriEngine {
 
     void ReducingSuccessorGenerator::reset() {
         SuccessorGenerator::reset();
-        memset(_enabled.get(), false, sizeof(bool) * _net._ntransitions);
-        memset(_stubborn.get(), false, sizeof(bool) * _net._ntransitions);
+        memset(_enabled.get(), false, sizeof(bool) * _net._numberOfTransitions);
+        memset(_stubborn.get(), false, sizeof(bool) * _net._numberOfTransitions);
     }
 }

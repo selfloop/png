@@ -35,15 +35,15 @@ namespace PetriEngine {
         class State {
         public:
 
-            MarkVal* marking() {
+            MarkingValue* marking() {
                 return _marking;
             }
 
-            const MarkVal* marking() const {
+            const MarkingValue* marking() const {
                 return _marking;
             }
 
-            void setMarking(MarkVal* m) {
+            void setMarking(MarkingValue* m) {
                 _marking = m;
             }
             
@@ -70,7 +70,7 @@ namespace PetriEngine {
                 std::cout << std::endl;
             }
         private:
-            MarkVal* _marking;
+            MarkingValue* _marking;
         };
 
     }

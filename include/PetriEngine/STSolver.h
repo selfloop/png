@@ -43,7 +43,7 @@ namespace PetriEngine {
         std::unique_ptr<uint32_t[]> _transitions;
         std::vector<size_t> _diff;
         const PetriNet& _net;
-        const MarkVal* _m0;
+        const MarkingValue* _m0;
         uint32_t _siphonDepth;
         uint32_t _timelimit;
         uint32_t _analysisTime;

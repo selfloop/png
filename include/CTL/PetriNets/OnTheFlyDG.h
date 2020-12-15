@@ -91,9 +91,9 @@ namespace PetriNets {
           }
       }
 
-      PetriConfig *createConfiguration(size_t marking, size_t own, Condition *query);
-      PetriConfig *createConfiguration(size_t marking, size_t own, const Condition_ptr &query) {
-          return createConfiguration(marking, own, query.get());
+      PetriConfig *createConfiguration(size_t marking, size_t own, Condition *queryPointer);
+      PetriConfig *createConfiguration(size_t marking, size_t own, const Condition_ptr &queryPointer) {
+          return createConfiguration(marking, own, queryPointer.get());
       }
       size_t createMarking(Marking &marking);
       void markingStats(const uint32_t *marking,
@@ -106,7 +106,7 @@ namespace PetriNets {
       Edge *newEdge(DependencyGraph::Configuration &t_source, uint32_t weight);
 
       std::stack<Edge *> recycle;
-      ptrie::map<ptrie::uchar, std::vector<PetriConfig *> > trie;
+      ptrie::map<ptrie::uchar, std::vector<PetriConfig*>> trie;
       linked_bucket_t<Edge, 1024 * 10> *edge_alloc = nullptr;
 
       // Problem  with linked bucket and complex constructor

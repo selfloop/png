@@ -25,7 +25,6 @@ namespace Algorithm {
             default:
                 std::cerr << "Search strategy is unsupported by the CTL-Engine"   <<  std::endl;
                 assert(false);
-                exit(ErrorCode);                
         }
     }
 

@@ -87,7 +87,7 @@ namespace PetriEngine {
                 if(_discovered % 1000000 == 0) std::cout << "Found number " << _discovered << std::endl;
 #endif
                 
-                MarkVal sum = 0;
+                MarkingValue sum = 0;
                 bool allsame = true;
                 uint32_t val = 0;
                 uint32_t active = 0;
@@ -123,8 +123,8 @@ namespace PetriEngine {
                 // update the max token bound for each place in the net (only for newly discovered markings)
                 for (uint32_t i = 0; i < _net.numberOfPlaces(); i++) 
                 {
-                    _maxPlaceBound[i] = std::max<MarkVal>( state.marking()[i],
-                                                            _maxPlaceBound[i]);
+                    _maxPlaceBound[i] = std::max<MarkingValue>(state.marking()[i],
+                                                               _maxPlaceBound[i]);
                 }
 
 #ifdef DEBUG    
@@ -142,13 +142,13 @@ namespace PetriEngine {
                 return _maxTokens;
             }
             
-            const std::vector<MarkVal>& maxPlaceBound() const {
+            const std::vector<MarkingValue>& maxPlaceBound() const {
                 return _maxPlaceBound;
             }
             
         protected:
             
-            void markingStats(const uint32_t* marking, MarkVal& sum, bool& allsame, uint32_t& val, uint32_t& active, uint32_t& last)
+            void markingStats(const uint32_t* marking, MarkingValue& sum, bool& allsame, uint32_t& val, uint32_t& active, uint32_t& last)
             {
                 uint32_t cnt = 0;
                 

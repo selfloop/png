@@ -15,7 +15,7 @@ namespace PetriEngine {
                 size_t exploredStates,
                 size_t discoveredStates,
                 int maxTokens,                
-                Structures::StateSetInterface* stateset, size_t lastmarking, const MarkVal* initialMarking)
+                Structures::StateSetInterface* stateset, size_t lastmarking, const MarkingValue* initialMarking)
         {
             if(result == Unknown) return std::make_pair(Unknown,false);
 

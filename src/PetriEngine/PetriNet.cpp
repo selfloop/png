@@ -22,8 +22,6 @@
 #include "PetriEngine/PQL/Contexts.h"
 #include "PetriEngine/Structures/State.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
@@ -32,18 +30,17 @@ using namespace std;
 namespace PetriEngine {
 
     PetriNet::PetriNet(uint32_t trans, uint32_t invariants, uint32_t places)
-    : _ninvariants(invariants), _ntransitions(trans), _nplaces(places),
-            _players(_ntransitions, 1),
-            _transitions(_ntransitions+1),
-            _invariants(_ninvariants),            
-            _placeToPtrs(_nplaces+1) {
+    : _numberOfInvariants(invariants), _numberOfTransitions(trans), _numberOfPlaces(places),
+      _players(_numberOfTransitions, 1),
+      _transitions(_numberOfTransitions + 1),
+      _invariants(_numberOfInvariants),
+      _placeToPtrs(_numberOfPlaces + 1) {
 
         // to avoid special cases
-        _transitions[_ntransitions].inputs = _ninvariants;
-        _transitions[_ntransitions].outputs = _ninvariants;
-        _placeToPtrs[_nplaces] = _ntransitions;
-        _initialMarking = new MarkVal[_nplaces];
-//        assert(_nplaces > 0);
+        _transitions[_numberOfTransitions].inputs = _numberOfInvariants;
+        _transitions[_numberOfTransitions].outputs = _numberOfInvariants;
+        _placeToPtrs[_numberOfPlaces] = _numberOfTransitions;
+        _initialMarking = new MarkingValue[_numberOfPlaces];
     }
 
     PetriNet::~PetriNet() {
@@ -52,9 +49,9 @@ namespace PetriEngine {
 
     int PetriNet::inArc(uint32_t place, uint32_t transition) const
     {
-        assert(_nplaces > 0);
-        assert(place < _nplaces);
-        assert(transition < _ntransitions);
+        assert(_numberOfPlaces > 0);
+        assert(place < _numberOfPlaces);
+        assert(transition < _numberOfTransitions);
         
         uint32_t imin = _transitions[transition].inputs;
         uint32_t imax = _transitions[transition].outputs;
@@ -74,11 +71,12 @@ namespace PetriEngine {
         }
         return 0;
     }
+
     int PetriNet::outArc(uint32_t transition, uint32_t place) const
     {
-        assert(_nplaces > 0);
-        assert(place < _nplaces);
-        assert(transition < _ntransitions);
+        assert(_numberOfPlaces > 0);
+        assert(place < _numberOfPlaces);
+        assert(transition < _numberOfTransitions);
         
         uint32_t imin = _transitions[transition].outputs;
         uint32_t imax = _transitions[transition+1].inputs;
@@ -89,13 +87,13 @@ namespace PetriEngine {
         return 0;   
     }
     
-    bool PetriNet::deadlocked(const MarkVal* m) const {
+    bool PetriNet::deadlocked(const MarkingValue* m) const {
         //Check that we can take from the marking
-        if(_nplaces == 0)
+        if(_numberOfPlaces == 0)
         {
-            return _ntransitions == 0;
+            return _numberOfTransitions == 0;
         }
-        for (size_t i = 0; i < _nplaces; i++) {
+        for (size_t i = 0; i < _numberOfPlaces; i++) {
             if(i == 0 || m[i] > 0) // orphans are currently under "place 0" as a special case
             {
                 uint32_t first = _placeToPtrs[i];
@@ -145,11 +143,11 @@ namespace PetriEngine {
 
     bool PetriNet::ownedBy(uint32_t id, player_t p) const {
         if(p == ANY) return true;
-        return (p & _players[id]) != 0;
+        return p == _players[id];
     }
 
     
-    bool PetriNet::fireable(const MarkVal *marking, int transitionIndex)
+    bool PetriNet::fireable(const MarkingValue *marking, int transitionIndex)
     {
         const TransPtr& transition = _transitions[transitionIndex];
         uint32_t first = transition.inputs;
@@ -163,20 +161,19 @@ namespace PetriEngine {
         return true;
     }
 
-    MarkVal PetriNet::initial(size_t id) const {
+    MarkingValue PetriNet::initial(size_t id) const {
         return _initialMarking[id];
     }
 
-    MarkVal* PetriNet::makeInitialMarking() const
-    {
-        MarkVal* marking = new MarkVal[_nplaces];
-        std::copy(_initialMarking, _initialMarking+_nplaces, marking);
+    MarkingValue* PetriNet::copyInitialMarking() const {
+        MarkingValue* marking = new MarkingValue[_numberOfPlaces];
+        std::copy(_initialMarking, _initialMarking + _numberOfPlaces, marking);
         return marking;
     }
     
     void PetriNet::sort()
     {
-        for(size_t i = 0; i < _ntransitions; ++i)
+        for(size_t i = 0; i < _numberOfTransitions; ++i)
         {
             TransPtr& t = _transitions[i];
             std::sort(&_invariants[t.inputs], &_invariants[t.outputs], [](const auto& a, const auto& b) { return a.place < b.place; });
@@ -195,7 +192,7 @@ namespace PetriEngine {
             << "<text>DefaultPage</text>" 
             << "</name>";
 
-        for(size_t i = 0; i < _nplaces; ++i)
+        for(size_t i = 0; i < _numberOfPlaces; ++i)
         {
             auto& p = _placenames[i];
             out << "<place id=\"" << p << "\">\n"
@@ -206,14 +203,14 @@ namespace PetriEngine {
             }
             out << "</place>\n";
         }
-        for(size_t i = 0; i < _ntransitions; ++i)
+        for(size_t i = 0; i < _numberOfTransitions; ++i)
         {
             out << "<transition id=\"" << _transitionnames[i] << "\">\n"
                 << "<name><text>" << _transitionnames[i] << "</text></name>\n";
             out << "</transition>\n";
         }
         size_t id = 0;
-        for(size_t t = 0; t < _ntransitions; ++t)
+        for(size_t t = 0; t < _numberOfTransitions; ++t)
         {
             auto pre = preset(t);
 

@@ -56,7 +56,7 @@ namespace PetriEngine {
                 size_t exploredStates = 0,
                 size_t discoveredStates = 0,
                 int maxTokens = 0,                
-                Structures::StateSetInterface* stateset = nullptr, size_t lastmarking = 0, const MarkVal* initialMarking = nullptr) = 0;
+                Structures::StateSetInterface* stateset = nullptr, size_t lastmarking = 0, const MarkingValue* initialMarking = nullptr) = 0;
         };
         
         class ResultPrinter : public AbstractHandler {
@@ -84,7 +84,7 @@ namespace PetriEngine {
                 size_t exploredStates = 0,
                 size_t discoveredStates = 0,
                 int maxTokens = 0,                
-                Structures::StateSetInterface* stateset = nullptr, size_t lastmarking = 0, const MarkVal* initialMarking = nullptr) override;
+                Structures::StateSetInterface* stateset = nullptr, size_t lastmarking = 0, const MarkingValue* initialMarking = nullptr) override;
             
             std::string printTechniques();
             

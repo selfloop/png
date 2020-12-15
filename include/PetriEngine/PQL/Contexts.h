@@ -117,7 +117,7 @@ namespace PetriEngine {
         public:
 
             /** Create evaluation context, this doesn't take ownership */
-            EvaluationContext(const MarkVal* marking,
+            EvaluationContext(const MarkingValue* marking,
                     const PetriNet* net) {
                 _marking = marking;
                 _net = net;
@@ -125,11 +125,11 @@ namespace PetriEngine {
             
             EvaluationContext() {};
 
-            const MarkVal* marking() const {
+            const MarkingValue* marking() const {
                 return _marking;
             }
             
-            void setMarking(MarkVal* marking) {
+            void setMarking(MarkingValue* marking) {
                 _marking = marking;
             }
 
@@ -137,7 +137,7 @@ namespace PetriEngine {
                 return _net;
             }
         private:
-            const MarkVal* _marking = nullptr;
+            const MarkingValue* _marking = nullptr;
             const PetriNet* _net = nullptr;
         };
 
@@ -146,7 +146,7 @@ namespace PetriEngine {
         public:
 
             DistanceContext(const PetriNet* net,
-                    const MarkVal* marking)
+                    const MarkingValue* marking)
             : EvaluationContext(marking, net) {
                 _negated = false;
             }
@@ -174,7 +174,7 @@ namespace PetriEngine {
         class SimplificationContext {
         public:
 
-            SimplificationContext(const MarkVal* marking,
+            SimplificationContext(const MarkingValue* marking,
                     const PetriNet* net, uint32_t queryTimeout, uint32_t lpTimeout,
                     LPCache* cache)
                     : _queryTimeout(queryTimeout), _lpTimeout(lpTimeout) {
@@ -193,7 +193,7 @@ namespace PetriEngine {
             }
 
 
-            const MarkVal* marking() const {
+            const MarkingValue* marking() const {
                 return _marking;
             }
 
@@ -233,7 +233,7 @@ namespace PetriEngine {
 
         private:
             bool _negated;
-            const MarkVal* _marking;
+            const MarkingValue* _marking;
             const PetriNet* _net;
             uint32_t _queryTimeout, _lpTimeout;
             std::chrono::high_resolution_clock::time_point _start;

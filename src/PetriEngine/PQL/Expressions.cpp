@@ -747,7 +747,7 @@ namespace PetriEngine {
                 for(auto& cpn : coloredContext->allColoredPlaceNames())
                 {
                     std::vector<Expr_ptr> sum;
-                    MarkVal init_marking = 0;
+                    MarkingValue init_marking = 0;
                     for(auto& pn : cpn.second)
                     {
                         auto id = std::make_shared<UnfoldedIdentifierExpr>(pn.second);
@@ -956,7 +956,7 @@ namespace PetriEngine {
             return RTRUE;
         }
         
-        size_t UnfoldedUpperBoundsCondition::value(const MarkVal* marking)
+        size_t UnfoldedUpperBoundsCondition::value(const MarkingValue* marking)
         {
             size_t tmp = 0;
             for(auto& p : _places)
