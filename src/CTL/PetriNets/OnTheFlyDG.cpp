@@ -283,9 +283,9 @@ namespace PetriNets {
           nextStates(query_marking, cond,
                      [&]() { leftEdge = newEdge(*petriConfig, numeric_limits<uint32_t>::max()); },
                      [&](Marking &mark) {
-                       auto res = fastEval(cond, &mark);
-                       if (res == Condition::RTRUE) return true;
-                       if (res == Condition::RFALSE) {
+                       auto queryResult = fastEval(cond, &mark);
+                       if (queryResult == Condition::RTRUE) return true;
+                       if (queryResult == Condition::RFALSE) {
                            left = nullptr;
                            leftEdge->targets.clear();
                            leftEdge = nullptr;
