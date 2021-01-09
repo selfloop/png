@@ -29,7 +29,11 @@ public:
     ReducingSuccessorGenerator(const PetriNet& net, std::vector<std::shared_ptr<PQL::Condition> >& queries);
     virtual ~ReducingSuccessorGenerator();
     void prepare(const Structures::State* state);
-    bool next(Structures::State& write);
+    bool next(Structures::State& write, PetriNet::player_t* player);
+    bool next(Structures::State& write) {
+        PetriNet::player_t player = PetriNet::ANY;
+        return next(write, &player);
+    }
     void presetOf(uint32_t place, bool make_closure = false);
     void postsetOf(uint32_t place, bool make_closure = false);
     void postPresetOf(uint32_t t, bool make_closure = false);

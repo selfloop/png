@@ -25,7 +25,11 @@ public:
     SuccessorGenerator(const PetriNet& net, std::vector<std::shared_ptr<PQL::Condition> >& queries);
     virtual ~SuccessorGenerator();
     void prepare(const Structures::State* state);
-    bool next(Structures::State& write,  PetriNet::player_t player = PetriNet::ANY);
+    bool next(Structures::State& write, PetriNet::player_t* player);
+    bool next(Structures::State& write) {
+        PetriNet::player_t player = PetriNet::ANY;
+        return next(write, &player);
+    }
     uint32_t fired()
     {
         return _succesorTransitionCounter - 1;

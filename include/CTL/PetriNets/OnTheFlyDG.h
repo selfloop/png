@@ -70,21 +70,21 @@ namespace PetriNets {
       }
       void nextStates(Marking &t_marking, Condition *,
                       std::function<void()> pre,
-                      std::function<bool(Marking &)> foreach,
+                      std::function<bool(Marking &, uint8_t)> foreach,
                       const std::function<void()> &post);
 
-      void nextStates(Marking &t_marking, Condition *cond, std::function<bool(Marking &)> foreach) {
+      void nextStates(Marking &t_marking, Condition *cond, std::function<bool(Marking &, uint8_t)> foreach) {
           nextStates(t_marking, cond, NOOP_FUNCTION, std::move(foreach), NOOP_FUNCTION);
       }
 
       template<typename T>
-      void dowork(T &gen, bool &first, std::function<void()> &pre, std::function<bool(Marking &)> &foreach) {
+      void dowork(T &gen, bool &first, std::function<void()> &pre, std::function<bool(Marking &, uint8_t)> &foreach) {
           gen.prepare(&query_marking);
-
-          while (gen.next(working_marking)) {
+          uint8_t player;
+          while (gen.next(working_marking, &player)) {
               if (first) pre();
               first = false;
-              if (!foreach(working_marking)) {
+              if (!foreach(working_marking, player)) {
                   gen.reset();
                   break;
               }

@@ -85,7 +85,7 @@ namespace PetriEngine {
         }
     }
 
-    bool SuccessorGenerator::next(Structures::State& write, PetriNet::player_t player) {
+    bool SuccessorGenerator::next(Structures::State& write, PetriNet::player_t* player) {
         for (; _successorPlaceCounter < _net._numberOfPlaces; ++_successorPlaceCounter) {
             // orphans are currently under "place 0" as a special case
             if (_successorPlaceCounter == 0 || (*_parent).marking()[_successorPlaceCounter] > 0) {
@@ -94,8 +94,7 @@ namespace PetriEngine {
                 }
                 uint32_t limit = _net._placeToPtrs[_successorPlaceCounter + 1];
                 for (; _succesorTransitionCounter != limit; ++_succesorTransitionCounter) {
-                    if (_is_game && !_net.ownedBy(_succesorTransitionCounter, player))
-                        continue;
+                    *player = _net.owner(_succesorTransitionCounter);
                     if (!checkIfPresetEnablesTransition(_succesorTransitionCounter)) continue;
                     memcpy(write.marking(), (*_parent).marking(), _net._numberOfPlaces * sizeof (MarkingValue));
                     consumePreset(write, _succesorTransitionCounter);

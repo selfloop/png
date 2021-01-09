@@ -226,7 +226,7 @@ namespace PetriNets {
       Edge *e = newEdge(*petriConfig, numeric_limits<uint32_t>::max());
       Condition::Result allValid = Condition::RTRUE;
       nextStates(query_marking, cond,
-                 [&](Marking &mark) {
+                 [&](Marking &mark, uint8_t player) {
                    auto res = fastEval((*cond)[0], &mark);
                    if (res != Condition::RUNKNOWN) {
                        if (res == Condition::RFALSE) {
@@ -282,7 +282,7 @@ namespace PetriNets {
           Edge *leftEdge = nullptr;
           nextStates(query_marking, cond,
                      [&]() { leftEdge = newEdge(*petriConfig, numeric_limits<uint32_t>::max()); },
-                     [&](Marking &mark) {
+                     [&](Marking &mark, uint8_t player) {
                        auto queryResult = fastEval(cond, &mark);
                        if (queryResult == Condition::RTRUE) return true;
                        if (queryResult == Condition::RFALSE) {
@@ -331,7 +331,7 @@ namespace PetriNets {
       Edge *e1 = nullptr;
       nextStates(query_marking, cond,
                  [&]() { e1 = newEdge(*petriConfig, numeric_limits<uint32_t>::max()); },
-                 [&](Marking &mark) {
+                 [&](Marking &mark, uint8_t player) {
                    auto res = fastEval(cond, &mark);
                    if (res == Condition::RTRUE) return true;
                    if (res == Condition::RFALSE) {
@@ -386,7 +386,7 @@ namespace PetriNets {
                        valid = r0 == Condition::RTRUE;
                    }
                  },
-                 [&](Marking &marking) {
+                 [&](Marking &marking, uint8_t player) {
                    if (left == nullptr && !valid) return false;
                    auto res = fastEval(cond, &marking);
                    if (res == Condition::RFALSE) return true;
@@ -443,7 +443,7 @@ namespace PetriNets {
       }
 
       nextStates(query_marking, cond,
-                 [&](Marking &mark) {
+                 [&](Marking &mark, uint8_t player) {
                    auto res = fastEval(cond, &mark);
                    if (res == Condition::RFALSE) return true;
                    if (res == Condition::RTRUE) {
@@ -478,7 +478,7 @@ namespace PetriNets {
       auto cond = dynamic_cast<EXCondition *>(petriConfig->query);
       auto subQuery = (*cond)[0];
       nextStates(query_marking, cond,
-                 [&](Marking &marking) {
+                 [&](Marking &marking, uint8_t player) {
                    auto res = fastEval(subQuery, &marking);
                    if (res == Condition::RTRUE) {
                        for (auto s : succs) {
@@ -594,7 +594,7 @@ namespace PetriNets {
       Marking &t_marking,
       Condition *ptr,
       std::function<void()> pre,
-      std::function<bool(Marking &)> foreach,
+      std::function<bool(Marking &, uint8_t)> foreach,
       const std::function<void()> &post
   ) {
       bool first = true;

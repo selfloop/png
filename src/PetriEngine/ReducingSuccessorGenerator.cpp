@@ -276,7 +276,7 @@ namespace PetriEngine {
         }        
     }
 
-    bool ReducingSuccessorGenerator::next(Structures::State& write) {
+    bool ReducingSuccessorGenerator::next(Structures::State& write, PetriNet::player_t* player) {
         while (!_ordering.empty()) {
             _current = _ordering.front();
             _ordering.pop_front();
