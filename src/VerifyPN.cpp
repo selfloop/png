@@ -1036,11 +1036,11 @@ int main(int argc, char* argv[]) {
     }
     
     if (ctl_ids.size() > 0) {
-        if(options.gamemode)
+        /*if(options.gamemode)
         {
             std::cerr << "Synthesis-engine does not support CTL" << std::endl;
             return UnknownCode;
-        }
+        }*/
         options.isctl=true;
         PetriEngine::Reachability::Strategy reachabilityStrategy=options.strategy;
 

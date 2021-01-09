@@ -76,9 +76,9 @@ void printResult(const std::string& qname, CTLResult& result, bool statisticslev
 }
 
 bool singleSolve(const Condition_ptr& queryPointer, PetriNet* net, CTLAlgorithmType algorithmType,
-                 Strategy strategyType, bool partialOrder, CTLResult& result)
+                 Strategy strategyType, bool partialOrder, CTLResult& result, bool gamemode)
 {
-    OnTheFlyDG graph(net, partialOrder);
+    OnTheFlyDG graph(net, partialOrder, gamemode);
     graph.setQuery(queryPointer);
     std::shared_ptr<Algorithm::FixedPointAlgorithm> alg = nullptr;
     if(getAlgorithm(alg, algorithmType, strategyType) == ErrorCode){
@@ -262,12 +262,12 @@ bool recursiveSolve(const Condition_ptr& queryPointer, PetriEngine::PetriNet* ne
     }
     else
     {
-        return singleSolve(queryPointer, net, algorithmType, strategyType, partialOrder, result);
+        return singleSolve(queryPointer, net, algorithmType, strategyType, partialOrder, result, options.gamemode);
     }
 }
 
-bool solveTrivially(PetriNet *net, bool partial_order, CTLResult &resultObject, bool &solved) {
-    OnTheFlyDG graph(net, partial_order);
+bool solveTrivially(PetriNet *net, bool partial_order, CTLResult &resultObject, bool &solved, bool gamemode) {
+    OnTheFlyDG graph(net, partial_order, gamemode);
     graph.setQuery(resultObject.query);
     switch (graph.initialEval()) {
         case Condition::RFALSE:
@@ -309,7 +309,7 @@ ReturnValue CTLMain(
         CTLResult resultObject(queries[queryNumber]);
         bool solved = false;
 
-        solveTrivially(net, isPartialOrder, resultObject, solved);
+        solveTrivially(net, isPartialOrder, resultObject, solved, gamemode);
 
         setFieldsToZero(resultObject);
 

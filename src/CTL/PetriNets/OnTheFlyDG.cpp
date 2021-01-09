@@ -8,18 +8,20 @@
 #include "PetriEngine/SuccessorGenerator.h"
 #include "PetriEngine/PQL/Expressions.h"
 #include "CTL/SearchStrategy/SearchStrategy.h"
+#include "PetriEngine/PetriNet.h"
 
 using namespace PetriEngine::PQL;
 using namespace DependencyGraph;
 
 namespace PetriNets {
-  OnTheFlyDG::OnTheFlyDG(PetriEngine::PetriNet *t_net, bool partial_order)
+  OnTheFlyDG::OnTheFlyDG(PetriEngine::PetriNet *t_net, bool partial_order, bool is_game)
       : encoder(t_net->numberOfPlaces(), 0),
         edge_alloc(new linked_bucket_t<Edge, 1024 * 10>(1)),
         conf_alloc(new linked_bucket_t<char[sizeof(PetriConfig)], 1024 * 1024>(1)),
         _redgen(*t_net),
         _partial_order(partial_order),
-        context(DistanceContext(t_net, query_marking.marking())) {
+        context(DistanceContext(t_net, query_marking.marking())),
+        _is_game(is_game) {
       net = t_net;
       n_places = t_net->numberOfPlaces();
       n_transitions = t_net->numberOfTransitions();
@@ -255,61 +257,141 @@ namespace PetriNets {
       auto cond = dynamic_cast<AUCondition *>(petriConfig->query);
       Edge *right = nullptr;
       auto r1 = fastEval((*cond)[1], &query_marking);
-      if (r1 != Condition::RUNKNOWN) {
-          //right side is not temporal, eval it right now!
-          if (r1 == Condition::RTRUE) {    //satisfied, no need to go through successors
-              succs.push_back(newEdge(*petriConfig, 0));
-              return;
-          } //else: It's not valid, no need to add any edge, just add successors
-      } else {
-          //right side is temporal, we need to evaluate it as normal
-          Configuration *c = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[1]);
-          right = newEdge(*petriConfig, /*(*cond)[1]->distance(context)*/0);
-          right->addTarget(c);
-      }
-      bool valid = false;
-      Configuration *left = nullptr;
-      auto r0 = fastEval((*cond)[0], &query_marking);
-      if (r0 != Condition::RUNKNOWN) {
-          //left side is not temporal, eval it right now!
-          valid = r0 == Condition::RTRUE;
-      } else {
-          //left side is temporal, include it in the edge
-          left = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[0]);
-      }
-      //if left side is guaranteed to be not satisfied, skip successor generation
-      if (valid || left != nullptr) {
-          Edge *leftEdge = nullptr;
+
+      if (_is_game) {
+          if (r1 == Condition::RUNKNOWN) {
+              Configuration *c = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[1]);
+              right = newEdge(*petriConfig, /*(*cond)[1]->distance(context)*/0);
+              right->addTarget(c);
+          } else {
+              bool valid = r1 == Condition::RTRUE;
+              if (valid) {
+                  succs.push_back(newEdge(*petriConfig, 0));
+                  return;
+              }   // else: right condition is not satisfied, no need to add an edge
+          }
+
+          Configuration *left = nullptr;
+          bool valid = false;
+
+          Condition::Result bValid = Condition::RTRUE;
+          Condition::Result aValid = Condition::RFALSE;
+
           nextStates(query_marking, cond,
-                     [&]() { leftEdge = newEdge(*petriConfig, numeric_limits<uint32_t>::max()); },
-                     [&](Marking &mark, uint8_t player) {
-                       auto queryResult = fastEval(cond, &mark);
-                       if (queryResult == Condition::RTRUE) return true;
-                       if (queryResult == Condition::RFALSE) {
-                           left = nullptr;
-                           leftEdge->targets.clear();
-                           leftEdge = nullptr;
+                     [&]() {
+                       auto r0 = fastEval((*cond)[0], &query_marking);
+                       if (r0 == Condition::RUNKNOWN) {
+                           left = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[0]);
+                       } else {
+                           valid = r0 == Condition::RTRUE;
+                       }
+                     },
+                     [&](Marking &marking, uint8_t player) {
+                       if (left == nullptr && !valid) return false;
+                       auto res = fastEval(cond, &marking);
+                       if (res == Condition::RFALSE && player == PetriEngine::PetriNet::ENV) {
+                           bValid = Condition::RFALSE;
                            return false;
                        }
-                       context.setMarking(mark.marking());
-                       leftEdge->weight = 0;
-                       Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
-                       leftEdge->addTarget(c);
-                       return true;
-                     },
-                     [&]() {
-                       if (leftEdge) {
-                           if (left != nullptr) {
-                               leftEdge->addTarget(left);
+                       if (res == Condition::RTRUE && player == PetriEngine::PetriNet::CTRL) {
+                           aValid = Condition::RTRUE;
+                           for (auto s : succs) {
+                               --s->refcnt;
+                               release(s);
                            }
-                           succs.push_back(leftEdge);
-                       }
-                     }
-          );
-      } //else: Left side is not temporal and it's false, no way to succeed there...
+                           succs.clear();
+                           succs.push_back(newEdge(*petriConfig, 0));
+                           if (right) {
+                               --right->refcnt;
+                               release(right);
+                               right = nullptr;
+                           }
 
-      if (right != nullptr) {
-          succs.push_back(right);
+                           if (left) {
+                               succs.back()->addTarget(left);
+                           }
+
+                           return false;
+                       }
+                       if (res == Condition::RUNKNOWN && player == PetriEngine::PetriNet::CTRL) {
+                           bValid = Condition::RUNKNOWN;
+                           context.setMarking(marking.marking());
+                           Edge *e = newEdge(*petriConfig, /*cond->distance(context)*/0);
+                           Configuration *c1 = createConfiguration(createMarking(marking), owner(marking, cond), cond);
+                           e->addTarget(c1);
+                           if (left != nullptr) {
+                               e->addTarget(left);
+                           }
+                           succs.push_back(e);
+                       }
+                       return true;
+                     }, NOOP_FUNCTION);
+
+          if (right != nullptr) {
+              succs.push_back(right);
+          }
+
+          if (bValid == Condition::RTRUE && (aValid == Condition::RTRUE)) {
+              succs.clear();
+              succs.push_back(newEdge(*petriConfig,0));
+          }
+      } else {
+          if (r1 != Condition::RUNKNOWN) {
+              //right side is not temporal, eval it right now!
+              if (r1 == Condition::RTRUE) {    //satisfied, no need to go through successors
+                  succs.push_back(newEdge(*petriConfig, 0));
+                  return;
+              } //else: It's not valid, no need to add any edge, just add successors
+          } else {
+              //right side is temporal, we need to evaluate it as normal
+              Configuration *c = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[1]);
+              right = newEdge(*petriConfig, /*(*cond)[1]->distance(context)*/0);
+              right->addTarget(c);
+          }
+          bool valid = false;
+          Configuration *left = nullptr;
+          auto r0 = fastEval((*cond)[0], &query_marking);
+          if (r0 != Condition::RUNKNOWN) {
+              //left side is not temporal, eval it right now!
+              valid = r0 == Condition::RTRUE;
+          } else {
+              //left side is temporal, include it in the edge
+              left = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[0]);
+          }
+          //if left side is guaranteed to be not satisfied, skip successor generation
+          if (valid || left != nullptr) {
+              Edge *leftEdge = nullptr;
+              nextStates(query_marking, cond,
+                         [&]() { leftEdge = newEdge(*petriConfig, numeric_limits<uint32_t>::max()); },
+                         [&](Marking &mark, uint8_t player) {
+                           auto queryResult = fastEval(cond, &mark);
+                           if (queryResult == Condition::RTRUE) return true;
+                           if (queryResult == Condition::RFALSE) {
+                               left = nullptr;
+                               leftEdge->targets.clear();
+                               leftEdge = nullptr;
+                               return false;
+                           }
+                           context.setMarking(mark.marking());
+                           leftEdge->weight = 0;
+                           Configuration *c = createConfiguration(createMarking(mark), owner(mark, cond), cond);
+                           leftEdge->addTarget(c);
+                           return true;
+                         },
+                         [&]() {
+                           if (leftEdge) {
+                               if (left != nullptr) {
+                                   leftEdge->addTarget(left);
+                               }
+                               succs.push_back(leftEdge);
+                           }
+                         }
+              );
+          } //else: Left side is not temporal and it's false, no way to succeed there...
+
+          if (right != nullptr) {
+              succs.push_back(right);
+          }
       }
   }
 

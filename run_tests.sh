@@ -32,7 +32,8 @@ for f in $(ls test_models) ; do
 	NP=$(grep "<property>" "test_models/$f/query.xml" | wc -l)
 	for Q in $(seq 1 $NP ) ; do 
 		echo "	Q$Q"
-		res=$(eval "timeout $T $1 $2 -x $Q test_models/$f/model.pnml test_models/$f/query.xml " | grep "Query is ")
+		[[ $f == game-* ]] && GAME="-g" || GAME=""
+		res=$(eval "timeout $T $1 $2 $GAME -x $Q test_models/$f/model.pnml test_models/$f/query.xml " | grep "Query is ")
 		if [ ! -z "$res" ] ; then
 			echo "$f:$Q:$res" >> $F
 		fi
