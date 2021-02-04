@@ -259,81 +259,54 @@ namespace PetriNets {
       auto r1 = fastEval((*cond)[1], &query_marking);
 
       if (_is_game) {
-          if (r1 == Condition::RUNKNOWN) {
-              Configuration *c = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[1]);
-              right = newEdge(*petriConfig, /*(*cond)[1]->distance(context)*/0);
-              right->addTarget(c);
-          } else {
-              bool valid = r1 == Condition::RTRUE;
-              if (valid) {
-                  succs.push_back(newEdge(*petriConfig, 0));
-                  return;
-              }   // else: right condition is not satisfied, no need to add an edge
-          }
+          if (r1 == Condition::RTRUE) { //satisfied, no need to go through successors
+              succs.push_back(newEdge(*petriConfig, 0));
+              return;
+          }   // else: right condition is not satisfied, no need to add an edge
 
-          Configuration *left = nullptr;
-          bool valid = false;
+          Condition::Result validForEnv = Condition::RTRUE;
+          Condition::Result validForCTRL = Condition::RFALSE;
 
-          Condition::Result bValid = Condition::RTRUE;
-          Condition::Result aValid = Condition::RFALSE;
+          Edge *leftEdge = nullptr;
 
           nextStates(query_marking, cond,
                      [&]() {
-                       auto r0 = fastEval((*cond)[0], &query_marking);
-                       if (r0 == Condition::RUNKNOWN) {
-                           left = createConfiguration(petriConfig->marking, petriConfig->owner, (*cond)[0]);
-                       } else {
-                           valid = r0 == Condition::RTRUE;
-                       }
+                       leftEdge = newEdge(*petriConfig, std::numeric_limits<uint32_t>::max());
                      },
                      [&](Marking &marking, uint8_t player) {
-                       if (left == nullptr && !valid) return false;
                        auto res = fastEval(cond, &marking);
                        if (res == Condition::RFALSE && player == PetriEngine::PetriNet::ENV) {
-                           bValid = Condition::RFALSE;
+                           validForEnv = Condition::RFALSE;
+                           leftEdge->targets.clear();
+                           leftEdge = nullptr;
                            return false;
+                       } else if (res == Condition::RTRUE) {
+                           if (player == PetriEngine::PetriNet::CTRL) {
+                               validForCTRL = Condition::RTRUE;
+                           }
+                           return true;
                        }
-                       if (res == Condition::RTRUE && player == PetriEngine::PetriNet::CTRL) {
-                           aValid = Condition::RTRUE;
-                           for (auto s : succs) {
-                               --s->refcnt;
-                               release(s);
-                           }
-                           succs.clear();
-                           succs.push_back(newEdge(*petriConfig, 0));
-                           if (right) {
-                               --right->refcnt;
-                               release(right);
-                               right = nullptr;
-                           }
 
-                           if (left) {
-                               succs.back()->addTarget(left);
-                           }
-
-                           return false;
-                       }
-                       if (res == Condition::RUNKNOWN && player == PetriEngine::PetriNet::CTRL) {
-                           bValid = Condition::RUNKNOWN;
-                           context.setMarking(marking.marking());
-                           Edge *e = newEdge(*petriConfig, /*cond->distance(context)*/0);
-                           Configuration *c1 = createConfiguration(createMarking(marking), owner(marking, cond), cond);
-                           e->addTarget(c1);
-                           if (left != nullptr) {
-                               e->addTarget(left);
-                           }
-                           succs.push_back(e);
-                       }
+                       context.setMarking(marking.marking());
+                       leftEdge->weight = 0;//std::min(leftEdge->weight, /*cond->distance(context)*/0);
+                       Configuration *c = createConfiguration(createMarking(marking), owner(marking, cond), cond);
+                       leftEdge->addTarget(c);
                        return true;
-                     }, NOOP_FUNCTION);
+                     },
+                     [&] {
+                       if (leftEdge) {
+                           succs.push_back(leftEdge);
+                       }
+                     }
+          );
 
           if (right != nullptr) {
               succs.push_back(right);
           }
 
-          if (bValid == Condition::RTRUE && (aValid == Condition::RTRUE)) {
+          if (validForEnv == Condition::RTRUE && validForCTRL == Condition::RTRUE) {
               succs.clear();
-              succs.push_back(newEdge(*petriConfig,0));
+              succs.push_back(newEdge(*petriConfig, 0));
           }
       } else {
           if (r1 != Condition::RUNKNOWN) {
