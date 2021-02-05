@@ -137,16 +137,11 @@ namespace PetriEngine {
         bool ReducebyRuleG(uint32_t* placeInQuery, bool remove_loops, bool remove_consumers);
         bool ReducebyRuleH(uint32_t* placeInQuery);
         bool ReducebyRuleJ(uint32_t* placeInQuery);
-        
-        std::string getTransitionName(uint32_t transition);
+
         std::string getPlaceName(uint32_t place);
         
-        Transition& getTransition(uint32_t transition);
         ArcIter getOutArc(Transition&, uint32_t place);
         ArcIter getInArc(uint32_t place, Transition&);
-        void eraseTransition(std::vector<uint32_t>&, uint32_t);
-        void skipTransition(uint32_t);
-        void skipPlace(uint32_t);
 
         bool consistent();
         bool hasTimedout() const {
@@ -158,7 +153,6 @@ namespace PetriEngine {
         std::vector<std::string> _initfire;
         std::unordered_map<std::string, std::vector<std::string>> _postfire;
         std::unordered_map<std::string, std::vector<ExpandedArc>> _extraconsume;
-        std::vector<uint8_t> _tflags;
         std::vector<uint32_t> _skipped_trans;
     };
 }
