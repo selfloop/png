@@ -2,8 +2,8 @@
 // Created by hamburger on 05.02.21.
 //
 
-#ifndef VERIFYPN_REDUCTIONRULER_H
-#define VERIFYPN_REDUCTIONRULER_H
+#ifndef VERIFYPN_REDUCTIONRULEE_H
+#define VERIFYPN_REDUCTIONRULEE_H
 
 #include <PetriEngine/PetriNetBuilder.h>
 #include "ReductionRule.h"
@@ -24,4 +24,4 @@ namespace PetriEngine {
   };
 }
 
-#endif //VERIFYPN_REDUCTIONRULEC_H
+#endif //VERIFYPN_REDUCTIONRULEE_H
