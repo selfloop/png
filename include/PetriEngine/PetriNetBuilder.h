@@ -34,8 +34,13 @@ namespace PetriEngine {
     class PetriNetBuilder : public AbstractPetriNetBuilder {
     public:
         friend class Reducer;
-        
-    public:
+
+        std::vector<Transition> _transitions;
+        std::vector<Place> _places;
+        std::unordered_map<std::string, uint32_t> _placenames;
+        std::unordered_map<std::string, uint32_t> _transitionnames;
+        std::vector<MarkingValue> initialMarking;
+
         PetriNetBuilder();
         PetriNetBuilder(const PetriNetBuilder& other);
         void addPlace(const std::string& name, int tokens, double x, double y) override;
@@ -131,13 +136,7 @@ namespace PetriEngine {
         std::chrono::high_resolution_clock::time_point _start;
 
     protected:
-        std::unordered_map<std::string, uint32_t> _placenames;
-        std::unordered_map<std::string, uint32_t> _transitionnames;
-        
-        std::vector<Transition> _transitions;
-        std::vector<Place> _places;
-        
-        std::vector<MarkingValue> initialMarking;
+
         Reducer reducer;
     };
 
