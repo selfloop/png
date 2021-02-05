@@ -1,17 +1,17 @@
 //
-// Created by hamburger on 04.02.21.
+// Created by hamburger on 05.02.21.
 //
 
-#ifndef VERIFYPN_REDUCTIONRULEA_H
-#define VERIFYPN_REDUCTIONRULEA_H
+#ifndef VERIFYPN_REDUCTIONRULEB_H
+#define VERIFYPN_REDUCTIONRULEB_H
 
 #include <PetriEngine/PetriNetBuilder.h>
 #include "ReductionRule.h"
 
 namespace PetriEngine {
-  class ReductionRuleA : public ReductionRule {
+  class ReductionRuleB : public ReductionRule {
     public:
-      ReductionRuleA(
+      ReductionRuleB(
           PetriNetBuilder *parent,
           std::chrono::high_resolution_clock::time_point *timer,
           int timeout,
@@ -37,4 +37,4 @@ namespace PetriEngine {
   };
 }
 
-#endif //VERIFYPN_REDUCTIONRULEA_H
+#endif //VERIFYPN_REDUCTIONRULEB_H

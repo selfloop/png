@@ -30,7 +30,7 @@ namespace PetriEngine {
           _skipped_trans(skipped_trans),
           _removedTransitions(_removedTransitions),
           _removedPlaces(_removedPlaces) {};
-      virtual bool reduce(uint32_t *placeInQuery) = 0;
+      virtual bool reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) = 0;
     protected:
       size_t *_removedTransitions = nullptr;
       size_t *_removedPlaces = nullptr;

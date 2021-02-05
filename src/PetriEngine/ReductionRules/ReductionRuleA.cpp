@@ -9,7 +9,7 @@
 #include "PetriEngine/ReductionRules/ReductionRuleA.h"
 
 namespace PetriEngine {
-  bool ReductionRuleA::reduce(uint32_t *placeInQuery) {
+  bool ReductionRuleA::reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
       // Rule A  - find transition t that has exactly one place in pre and post and remove one of the places (and t)
       bool continueReductions = false;
       const size_t numberoftransitions = parent->numberOfTransitions();
