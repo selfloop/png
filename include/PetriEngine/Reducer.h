@@ -18,34 +18,34 @@
 namespace PetriEngine {
 
     using ArcIter = std::vector<Arc>::iterator;
-    
+
     class PetriNetBuilder;
-        
+
     class QueryPlaceAnalysisContext : public PQL::AnalysisContext {
         std::vector<uint32_t> _placeInQuery;
         bool _deadlock;
     public:
 
-        QueryPlaceAnalysisContext(const std::unordered_map<std::string, uint32_t>& pnames, const std::unordered_map<std::string, uint32_t>& tnames, const PetriNet* net) 
+        QueryPlaceAnalysisContext(const std::unordered_map<std::string, uint32_t>& pnames, const std::unordered_map<std::string, uint32_t>& tnames, const PetriNet* net)
         : PQL::AnalysisContext(pnames, tnames, net) {
             _placeInQuery.resize(_placeNames.size(), 0);
             _deadlock = false;
         };
-        
+
         virtual ~QueryPlaceAnalysisContext()
         {
         }
-        
+
         uint32_t*  getQueryPlaceCount(){
             return _placeInQuery.data();
         }
 
         bool hasDeadlock() { return _deadlock; }
-        
+
         virtual void setHasDeadlock() override {
             _deadlock = true;
         };
-        
+
         ResolutionResult resolve(const std::string& identifier, bool place) override {
             if(!place) return PQL::AnalysisContext::resolve(identifier, false);
             ResolutionResult result;
@@ -60,7 +60,7 @@ namespace PetriEngine {
                 _placeInQuery[i]++;
                 return result;
             }
-            
+
             return result;
         }
 
@@ -69,7 +69,7 @@ namespace PetriEngine {
    struct ExpandedArc
    {
        ExpandedArc(std::string place, size_t weight) : place(place), weight(weight) {}
-       
+
         friend std::ostream& operator<<(std::ostream& os, ExpandedArc const & ea) {
             for(size_t i = 0; i < ea.weight; ++i)
             {
@@ -77,18 +77,18 @@ namespace PetriEngine {
             }
             return os;
         }
-       
-        std::string place;        
+
+        std::string place;
         size_t weight;
    };
-    
+
     class Reducer {
     public:
         Reducer(PetriNetBuilder*);
         ~Reducer();
         void Print(QueryPlaceAnalysisContext& context); // prints the net, just for debugging
         void Reduce(QueryPlaceAnalysisContext& context, int enablereduction, bool reconstructTrace, int timeout, bool remove_loops, bool remove_consumers, bool next_safe, std::vector<uint32_t>& reductions);
-        
+
         size_t RemovedTransitions() const {
             return _removedTransitions;
         }
@@ -117,12 +117,25 @@ namespace PetriEngine {
         void extraConsume(std::ostream&, const std::string& transition);
         void initFire(std::ostream&);
 
-    private:
-        size_t _removedTransitions = 0;
-        size_t _removedPlaces= 0;
-        size_t _ruleA = 0, _ruleB = 0, _ruleC = 0, _ruleD = 0, _ruleE = 0, _ruleF = 0, _ruleG = 0, _ruleH = 0, _ruleI = 0, _ruleJ = 0;
         PetriNetBuilder* parent = nullptr;
+        bool hasTimedout() const {
+            auto end = std::chrono::high_resolution_clock::now();
+            auto diff = std::chrono::duration_cast<std::chrono::seconds>(end - _timer);
+            return (diff.count() >= _timeout);
+        }
         bool reconstructTrace = false;
+        std::vector<std::string> _initfire;
+        std::unordered_map<std::string, std::vector<std::string>> _postfire;
+        std::unordered_map<std::string, std::vector<ExpandedArc>> _extraconsume;
+        size_t _removedPlaces= 0;
+        size_t _removedTransitions = 0;
+        std::vector<uint32_t> _skipped_trans;
+        bool consistent() const;
+        static ArcIter getInArc(uint32_t place, Transition&);
+        static ArcIter getOutArc(Transition&, uint32_t place);
+        std::string getPlaceName(uint32_t place) const;
+      private:
+        size_t _ruleA = 0, _ruleB = 0, _ruleC = 0, _ruleD = 0, _ruleE = 0, _ruleF = 0, _ruleG = 0, _ruleH = 0, _ruleI = 0, _ruleJ = 0;
         std::chrono::high_resolution_clock::time_point _timer;
         int _timeout = 0;
 
@@ -138,22 +151,6 @@ namespace PetriEngine {
         bool ReducebyRuleH(uint32_t* placeInQuery);
         bool ReducebyRuleJ(uint32_t* placeInQuery);
 
-        std::string getPlaceName(uint32_t place);
-        
-        ArcIter getOutArc(Transition&, uint32_t place);
-        ArcIter getInArc(uint32_t place, Transition&);
-
-        bool consistent();
-        bool hasTimedout() const {
-            auto end = std::chrono::high_resolution_clock::now();
-            auto diff = std::chrono::duration_cast<std::chrono::seconds>(end - _timer);
-            return (diff.count() >= _timeout);
-        }
-        
-        std::vector<std::string> _initfire;
-        std::unordered_map<std::string, std::vector<std::string>> _postfire;
-        std::unordered_map<std::string, std::vector<ExpandedArc>> _extraconsume;
-        std::vector<uint32_t> _skipped_trans;
     };
 }
 

@@ -12,9 +12,9 @@ namespace PetriEngine {
   bool ReductionRuleG::reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
       if (!remove_loops) return false;
       bool continueReductions = false;
-      for (uint32_t t = 0; t < parent->numberOfTransitions(); ++t) {
-          if (hasTimedout()) return false;
-          Transition &trans = parent->_transitions[t];
+      for (uint32_t t = 0; t < reducer->parent->numberOfTransitions(); ++t) {
+          if (reducer->hasTimedout()) return false;
+          Transition &trans = reducer->parent->_transitions[t];
           if (trans.skip) continue;
           if (trans.inhib) continue;
           if (trans.pre.size() < trans.post.size()) continue;
@@ -31,7 +31,7 @@ namespace PetriEngine {
                   ok = false;
                   break;
               }
-              if (preit->inhib || parent->_places[preit->place].inhib) {
+              if (preit->inhib || reducer->parent->_places[preit->place].inhib) {
                   ok = false;
                   break;
               }
@@ -61,7 +61,7 @@ namespace PetriEngine {
           }
           if (ok) {
               for (preit = trans.pre.begin(); preit != trans.pre.end(); ++preit) {
-                  if (preit->inhib || parent->_places[preit->place].inhib) {
+                  if (preit->inhib || reducer->parent->_places[preit->place].inhib) {
                       ok = false;
                       break;
                   }
@@ -72,7 +72,7 @@ namespace PetriEngine {
           // TODO: ++_ruleG;
           skipTransition(t);
       }
-      assert(consistent());
+      assert(reducer->consistent());
       return continueReductions;
   }
 }

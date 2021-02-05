@@ -12,10 +12,10 @@ namespace PetriEngine {
   bool ReductionRuleB::reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
       // Rule B - find place p that has exactly one transition in pre and exactly one in post and remove the place
       bool continueReductions = false;
-      const size_t numberofplaces = parent->numberOfPlaces();
+      const size_t numberofplaces = reducer->parent->numberOfPlaces();
       for (uint32_t p = 0; p < numberofplaces; p++) {
-          if (hasTimedout()) return false;
-          Place &place = parent->_places[p];
+          if (reducer->hasTimedout()) return false;
+          Place &place = reducer->parent->_places[p];
 
           if (place.skip) continue;    // already removed
           // B5. dont mess up query
@@ -53,11 +53,11 @@ namespace PetriEngine {
                   // to remove consumers.
                   continue;
 
-              if (parent->initMarking()[p] > 0 && in.pre.size() != 1)
+              if (reducer->parent->initMarking()[p] > 0 && in.pre.size() != 1)
                   continue;
 
-              auto inArc = getInArc(p, in);
-              auto outArc = getOutArc(out, p);
+              auto inArc = reducer->getInArc(p, in);
+              auto outArc = reducer->getOutArc(out, p);
 
               // B3. Output is a multiple of input and nonzero.
               if (outArc->weight < inArc->weight)
@@ -76,7 +76,7 @@ namespace PetriEngine {
               {
                   bool post_ok = false;
                   for (const Arc &a : in.post) {
-                      post_ok |= parent->_places[a.place].inhib;
+                      post_ok |= reducer->parent->_places[a.place].inhib;
                       post_ok |= placeInQuery[a.place];
                       if (post_ok) break;
                   }
@@ -86,7 +86,7 @@ namespace PetriEngine {
               {
                   bool pre_ok = false;
                   for (const Arc &a : in.pre) {
-                      pre_ok |= parent->_places[a.place].inhib;
+                      pre_ok |= reducer->parent->_places[a.place].inhib;
                       pre_ok |= placeInQuery[a.place];
                       if (pre_ok) break;
                   }
@@ -115,65 +115,65 @@ namespace PetriEngine {
                   continue;
 
               // UB2. we need to remember initial marking
-              uint initm = parent->initMarking()[p];
+              uint initm = reducer->parent->initMarking()[p];
               initm /= inArc->weight; // integer-devision is floor by default
 
-              if (reconstructTrace) {
+              if (reducer->reconstructTrace) {
                   // remember reduction for recreation of trace
                   std::string toutname = getTransitionName(tOut);
                   std::string tinname = getTransitionName(tIn);
-                  std::string pname = getPlaceName(p);
-                  Arc &a = *getInArc(p, in);
-                  _extraconsume[tinname].emplace_back(pname, a.weight);
+                  std::string pname = reducer->getPlaceName(p);
+                  Arc &a = *reducer->getInArc(p, in);
+                  reducer->_extraconsume[tinname].emplace_back(pname, a.weight);
                   for (size_t i = 0; i < multiplier; ++i) {
-                      _postfire[toutname].push_back(tinname);
+                      reducer->_postfire[toutname].push_back(tinname);
                   }
 
                   for (size_t i = 0; initm > 0 && i < initm / inArc->weight; ++i) {
-                      _initfire.push_back(tinname);
+                      reducer->_initfire.push_back(tinname);
                   }
               }
 
               continueReductions = true;
               // TODO: _ruleB++;
               // UB1. Remove place p
-              parent->initialMarking[p] = 0;
+              reducer->parent->initialMarking[p] = 0;
               // We need to remember that when tOut fires, tIn fires just after.
               // this should fix the trace
 
               // UB3. move arcs from t' to t
               for (auto &arc : in.post) { // remove tPost
-                  auto _arc = getOutArc(out, arc.place);
+                  auto _arc = reducer->getOutArc(out, arc.place);
                   // UB2. Update initial marking
-                  parent->initialMarking[arc.place] += initm * arc.weight;
+                  reducer->parent->initialMarking[arc.place] += initm * arc.weight;
                   if (_arc != out.post.end()) {
                       _arc->weight += arc.weight * multiplier;
                   } else {
                       out.post.push_back(arc);
                       out.post.back().weight *= multiplier;
-                      parent->_places[arc.place].producers.push_back(tOut);
+                      reducer->parent->_places[arc.place].producers.push_back(tOut);
 
                       std::sort(out.post.begin(), out.post.end());
-                      std::sort(parent->_places[arc.place].producers.begin(),
-                                parent->_places[arc.place].producers.end());
+                      std::sort(reducer->parent->_places[arc.place].producers.begin(),
+                                reducer->parent->_places[arc.place].producers.end());
                   }
               }
               for (auto &arc : in.pre) { // remove tPost
                   if (arc.place == p)
                       continue;
-                  auto _arc = getInArc(arc.place, out);
+                  auto _arc = reducer->getInArc(arc.place, out);
                   // UB2. Update initial marking
-                  parent->initialMarking[arc.place] += initm * arc.weight;
+                  reducer->parent->initialMarking[arc.place] += initm * arc.weight;
                   if (_arc != out.pre.end()) {
                       _arc->weight += arc.weight * multiplier;
                   } else {
                       out.pre.push_back(arc);
                       out.pre.back().weight *= multiplier;
-                      parent->_places[arc.place].consumers.push_back(tOut);
+                      reducer->parent->_places[arc.place].consumers.push_back(tOut);
 
                       std::sort(out.pre.begin(), out.pre.end());
-                      std::sort(parent->_places[arc.place].consumers.begin(),
-                                parent->_places[arc.place].consumers.end());
+                      std::sort(reducer->parent->_places[arc.place].consumers.begin(),
+                                reducer->parent->_places[arc.place].consumers.end());
                   }
               }
 
@@ -196,7 +196,7 @@ namespace PetriEngine {
               skipTransition(tIn);
           }
       } // end of Rule B main for-loop
-      assert(consistent());
+      assert(reducer->consistent());
       return continueReductions;
   }
 }

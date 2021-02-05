@@ -10,22 +10,22 @@
 namespace PetriEngine {
   bool ReductionRuleJ::reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
       bool continueReductions = false;
-      for (uint32_t t = 0; t < parent->numberOfTransitions(); ++t) {
-          if (hasTimedout())
+      for (uint32_t t = 0; t < reducer->parent->numberOfTransitions(); ++t) {
+          if (reducer->hasTimedout())
               return continueReductions;
 
-          if (parent->_transitions[t].skip ||
-              parent->_transitions[t].inhib ||
-              parent->_transitions[t].pre.size() != 1)
+          if (reducer->parent->_transitions[t].skip ||
+              reducer->parent->_transitions[t].inhib ||
+              reducer->parent->_transitions[t].pre.size() != 1)
               continue;
-          auto p = parent->_transitions[t].pre[0].place;
+          auto p = reducer->parent->_transitions[t].pre[0].place;
           if (placeInQuery[p] > 0) {
               continue; // can be relaxed
           }
-          if (parent->initialMarking[p] > 0) {
+          if (reducer->parent->initialMarking[p] > 0) {
               continue; // can be relaxed
           }
-          const Place &place = parent->_places[p];
+          const Place &place = reducer->parent->_places[p];
           if (place.skip) continue;
           if (place.inhib) continue;
           if (place.consumers.empty()) continue;
@@ -45,7 +45,7 @@ namespace PetriEngine {
           // if either all pre or all post are query-free, we are ok.
           bool inquery = false;
           for (auto t : place.consumers) {
-              Transition &trans = parent->_transitions[t];
+              Transition &trans = reducer->parent->_transitions[t];
               if (trans.pre.size() == 1) // can be relaxed
               {
                   // check that weights match
@@ -57,7 +57,7 @@ namespace PetriEngine {
                   break;
               }
               for (auto &pp : trans.post) {
-                  ok &= !parent->_places[pp.place].inhib;
+                  ok &= !reducer->parent->_places[pp.place].inhib;
                   inquery |= placeInQuery[pp.place] > 0;
                   ok &= pp.weight == 1; // can be relaxed
               }
@@ -67,10 +67,10 @@ namespace PetriEngine {
           if (!ok) continue;
           // check that pre of producing do not mess with query or inhib
           for (auto &t : place.producers) {
-              Transition &trans = parent->_transitions[t];
+              Transition &trans = reducer->parent->_transitions[t];
               for (const auto &arc : trans.post) {
                   ok &= !inquery || placeInQuery[arc.place] == 0;
-                  ok &= !parent->_places[arc.place].inhib;
+                  ok &= !reducer->parent->_places[arc.place].inhib;
               }
           }
           if (!ok) continue;
@@ -90,10 +90,10 @@ namespace PetriEngine {
           std::vector<Transition> pres;
 
           for (auto t : pp.consumers)
-              posts.push_back(parent->_transitions[t].post);
+              posts.push_back(reducer->parent->_transitions[t].post);
 
           for (auto t : pp.producers)
-              pres.push_back(parent->_transitions[t]);
+              pres.push_back(reducer->parent->_transitions[t]);
 
           // remove old transitions, we will create new ones
           for (auto t : pp.consumers)
@@ -105,43 +105,44 @@ namespace PetriEngine {
           // compute all permutations
           for (auto &trans : pres) {
               for (auto &postset : posts) {
-                  auto id = parent->_transitions.size();
-                  if (!_skipped_trans.empty())
-                      id = _skipped_trans.back();
+                  auto id = reducer->parent->_transitions.size();
+                  if (!reducer->_skipped_trans.empty())
+                      id = reducer->_skipped_trans.back();
                   else {
                       continue;
-                      parent->_transitions.emplace_back();
+                      reducer->parent->_transitions.emplace_back();
                   }
-                  parent->_transitions[id] = trans;
-                  auto &target = parent->_transitions[id];
+                  reducer->parent->_transitions[id] = trans;
+                  auto &target = reducer->parent->_transitions[id];
                   for (auto &arc : postset)
                       target.addPostArc(arc);
 
                   // add to places
-                  if (_skipped_trans.empty())
-                      parent->_transitionnames[newTransName()] = id;
+                  if (reducer->_skipped_trans.empty())
+                      reducer->parent->_transitionnames[newTransName()] = id;
 
                   for (auto &arc : target.pre)
-                      parent->_places[arc.place].addConsumer(id);
+                      reducer->parent->_places[arc.place].addConsumer(id);
                   for (auto &arc : target.post)
-                      parent->_places[arc.place].addProducer(id);
-                  if (!_skipped_trans.empty()) {
-                      --_removedTransitions; // recycling
-                      _skipped_trans.pop_back();
+                      reducer->parent->_places[arc.place].addProducer(id);
+                  if (!reducer->_skipped_trans.empty()) {
+                      --reducer->_removedTransitions; // recycling
+                      reducer->_skipped_trans.pop_back();
                   }
-                  parent->_transitions[id].skip = false;
-                  parent->_transitions[id].inhib = false;
-                  consistent();
+                  reducer->parent->_transitions[id].skip = false;
+                  reducer->parent->_transitions[id].inhib = false;
+                  reducer->consistent();
               }
           }
-          consistent();
+          reducer->consistent();
       }
       return continueReductions;
   }
+
   std::string ReductionRuleJ::newTransName() {
       auto prefix = "CT";
       auto tmp = prefix + std::to_string(_tnameid);
-      while (parent->_transitionnames.count(tmp) >= 1) {
+      while (reducer->parent->_transitionnames.count(tmp) >= 1) {
           ++_tnameid;
           tmp = prefix + std::to_string(_tnameid);
       }

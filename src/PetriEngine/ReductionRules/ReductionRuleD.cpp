@@ -13,11 +13,11 @@ namespace PetriEngine {
       // Rule D - two transitions with the same pre and post and same inhibitor arcs
       // This does not alter the trace.
       bool continueReductions = false;
-      _tflags.resize(parent->_transitions.size(), 0);
+      _tflags.resize(reducer->parent->_transitions.size(), 0);
       std::fill(_tflags.begin(), _tflags.end(), 0);
       bool has_empty_trans = false;
-      for (size_t t = 0; t < parent->_transitions.size(); ++t) {
-          auto &trans = parent->_transitions[t];
+      for (size_t t = 0; t < reducer->parent->_transitions.size(); ++t) {
+          auto &trans = reducer->parent->_transitions[t];
           if (!trans.skip && trans.pre.size() == 0 && trans.post.size() == 0) {
               if (has_empty_trans) {
                   // TODO: ++_ruleD;
@@ -27,10 +27,10 @@ namespace PetriEngine {
           }
 
       }
-      for (auto &op : parent->_places)
+      for (auto &op : reducer->parent->_places)
           for (size_t outer = 0; outer < op.consumers.size(); ++outer) {
               auto touter = op.consumers[outer];
-              if (hasTimedout()) return false;
+              if (reducer->hasTimedout()) return false;
               if (_tflags[touter] != 0) continue;
               _tflags[touter] = 1;
               Transition &tout = getTransition(touter);
@@ -48,7 +48,7 @@ namespace PetriEngine {
                   if (tin.inhib) continue;
 
                   for (size_t swp = 0; swp < 2; ++swp) {
-                      if (hasTimedout()) return false;
+                      if (reducer->hasTimedout()) return false;
 
                       if (tin.skip || tout.skip) break;
 
@@ -127,7 +127,7 @@ namespace PetriEngine {
                   }
               }
           } // end of main for loop for rule D
-      assert(consistent());
+      assert(reducer->consistent());
       return continueReductions;
   }
 }

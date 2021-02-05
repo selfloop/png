@@ -11,10 +11,10 @@
 namespace PetriEngine {
   bool ReductionRuleF::reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
       bool continueReductions = false;
-      const size_t numberofplaces = parent->numberOfPlaces();
+      const size_t numberofplaces = reducer->parent->numberOfPlaces();
       for (uint32_t p = 0; p < numberofplaces; ++p) {
-          if (hasTimedout()) return false;
-          Place &place = parent->_places[p];
+          if (reducer->hasTimedout()) return false;
+          Place &place = reducer->parent->_places[p];
           if (place.skip) continue;
           if (place.inhib) continue;
           if (place.producers.size() < place.consumers.size()) continue;
@@ -23,12 +23,12 @@ namespace PetriEngine {
           bool ok = true;
           for (uint cons : place.consumers) {
               Transition &t = getTransition(cons);
-              auto w = getInArc(p, t)->weight;
-              if (w > parent->initialMarking[p]) {
+              auto w = reducer->getInArc(p, t)->weight;
+              if (w > reducer->parent->initialMarking[p]) {
                   ok = false;
                   break;
               } else {
-                  auto it = getOutArc(t, p);
+                  auto it = reducer->getOutArc(t, p);
                   if (it == t.post.end() ||
                       it->place != p ||
                       it->weight < w) {
@@ -42,12 +42,12 @@ namespace PetriEngine {
 
           // TODO: ++_ruleF;
 
-          if ((numberofplaces - *_removedPlaces) > 1) {
-              if (reconstructTrace) {
+          if ((numberofplaces - reducer->_removedPlaces) > 1) {
+              if (reducer->reconstructTrace) {
                   for (auto t : place.consumers) {
                       std::string tname = getTransitionName(t);
-                      const ArcIter arc = getInArc(p, getTransition(t));
-                      _extraconsume[tname].emplace_back(getPlaceName(p), arc->weight);
+                      const ArcIter arc = reducer->getInArc(p, getTransition(t));
+                      reducer->_extraconsume[tname].emplace_back(reducer->getPlaceName(p), arc->weight);
                   }
               }
               skipPlace(p);
@@ -55,7 +55,7 @@ namespace PetriEngine {
           }
 
       }
-      assert(consistent());
+      assert(reducer->consistent());
       return continueReductions;
   }
 }

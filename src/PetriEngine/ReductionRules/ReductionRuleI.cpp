@@ -13,12 +13,12 @@ namespace PetriEngine {
       bool reduced = false;
       if (remove_loops) {
           std::vector<uint32_t> wtrans;
-          std::vector<bool> tseen(parent->numberOfTransitions(), false);
+          std::vector<bool> tseen(reducer->parent->numberOfTransitions(), false);
 
-          for (uint32_t p = 0; p < parent->numberOfPlaces(); ++p) {
-              if (hasTimedout()) return false;
+          for (uint32_t p = 0; p < reducer->parent->numberOfPlaces(); ++p) {
+              if (reducer->hasTimedout()) return false;
               if (placeInQuery[p] > 0) {
-                  const Place &place = parent->_places[p];
+                  const Place &place = reducer->parent->_places[p];
                   for (auto t : place.consumers) {
                       if (!tseen[t]) {
                           wtrans.push_back(t);
@@ -34,18 +34,18 @@ namespace PetriEngine {
               }
           }
 
-          std::vector<bool> pseen(parent->numberOfPlaces(), false);
+          std::vector<bool> pseen(reducer->parent->numberOfPlaces(), false);
           while (!wtrans.empty()) {
-              if (hasTimedout()) return false;
+              if (reducer->hasTimedout()) return false;
               auto t = wtrans.back();
               wtrans.pop_back();
-              const Transition &trans = parent->_transitions[t];
+              const Transition &trans = reducer->parent->_transitions[t];
               for (const Arc &arc : trans.pre) {
-                  const Place &place = parent->_places[arc.place];
+                  const Place &place = reducer->parent->_places[arc.place];
                   if (arc.inhib) {
                       for (auto pt : place.consumers) {
                           if (!tseen[pt]) {
-                              Transition &trans = parent->_transitions[pt];
+                              Transition &trans = reducer->parent->_transitions[pt];
                               auto it = trans.post.begin();
                               for (; it != trans.post.end(); ++it)
                                   if (it->place >= arc.place) break;
@@ -62,7 +62,7 @@ namespace PetriEngine {
                   } else {
                       for (auto pt : place.producers) {
                           if (!tseen[pt]) {
-                              Transition &trans = parent->_transitions[pt];
+                              Transition &trans = reducer->parent->_transitions[pt];
                               auto it = trans.pre.begin();
                               for (; it != trans.pre.end(); ++it)
                                   if (it->place >= arc.place) break;
@@ -90,15 +90,15 @@ namespace PetriEngine {
               }
           }
 
-          for (size_t t = 0; t < parent->numberOfTransitions(); ++t) {
-              if (!tseen[t] && !parent->_transitions[t].skip) {
+          for (size_t t = 0; t < reducer->parent->numberOfTransitions(); ++t) {
+              if (!tseen[t] && !reducer->parent->_transitions[t].skip) {
                   skipTransition(t);
                   reduced = true;
               }
           }
 
-          for (size_t p = 0; p < parent->numberOfPlaces(); ++p) {
-              if (!pseen[p] && !parent->_places[p].skip && placeInQuery[p] == 0) {
+          for (size_t p = 0; p < reducer->parent->numberOfPlaces(); ++p) {
+              if (!pseen[p] && !reducer->parent->_places[p].skip && placeInQuery[p] == 0) {
                   assert(placeInQuery[p] == 0);
                   skipPlace(p);
                   reduced = true;
@@ -109,10 +109,10 @@ namespace PetriEngine {
               // TODO: ++_ruleI;
           }
       } else {
-          const size_t numberofplaces = parent->numberOfPlaces();
+          const size_t numberofplaces = reducer->parent->numberOfPlaces();
           for (uint32_t p = 0; p < numberofplaces; ++p) {
-              if (hasTimedout()) return false;
-              Place &place = parent->_places[p];
+              if (reducer->hasTimedout()) return false;
+              Place &place = reducer->parent->_places[p];
               if (place.skip) continue;
               if (place.inhib) continue;
               if (placeInQuery[p] > 0) continue;
@@ -124,7 +124,7 @@ namespace PetriEngine {
               std::vector<uint32_t> torem;
               if (remove_consumers) {
                   for (auto &t : place.producers) {
-                      auto &trans = parent->_transitions[t];
+                      auto &trans = reducer->parent->_transitions[t];
                       if (trans.post.size() != 1) // place will be removed later
                           continue;
                       bool ok = true;
@@ -139,7 +139,7 @@ namespace PetriEngine {
               skipPlace(p);
               for (auto t : torem)
                   skipTransition(t);
-              assert(consistent());
+              assert(reducer->consistent());
           }
       }
 

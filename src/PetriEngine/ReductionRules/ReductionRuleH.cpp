@@ -10,10 +10,10 @@
 
 namespace PetriEngine {
   bool ReductionRuleH::reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
-      if (reconstructTrace)
+      if (reducer->reconstructTrace)
           return false; // we don't know where in the loop the tokens are needed
       auto transok = [this](uint32_t t) -> uint32_t {
-        auto &trans = parent->_transitions[t];
+        auto &trans = reducer->parent->_transitions[t];
         if (_tflags[t] != 0)
             return _tflags[t];
         _tflags[t] = 1;
@@ -36,8 +36,8 @@ namespace PetriEngine {
         if (trans.pre[0].weight != 1 ||
             trans.post[0].weight != 1 ||
             p1 == p2 ||
-            parent->_places[p1].inhib ||
-            parent->_places[p2].inhib) {
+            reducer->parent->_places[p1].inhib ||
+            reducer->parent->_places[p2].inhib) {
             return 2;
         }
         return 1;
@@ -53,13 +53,13 @@ namespace PetriEngine {
         if (i == loop.size() - 1)
             return false;
 
-        auto p1 = parent->_transitions[loop[i]].pre[0].place;
+        auto p1 = reducer->parent->_transitions[loop[i]].pre[0].place;
         bool removed = false;
 
         for (size_t j = i + 1; j < loop.size() - 1; ++j) {
-            if (hasTimedout())
+            if (reducer->hasTimedout())
                 return removed;
-            auto p2 = parent->_transitions[loop[j]].pre[0].place;
+            auto p2 = reducer->parent->_transitions[loop[j]].pre[0].place;
             if (placeInQuery[p2] > 0 || placeInQuery[p1] > 0) {
                 p1 = p2;
                 continue;
@@ -70,14 +70,14 @@ namespace PetriEngine {
             removed = true;
             // TODO: ++_ruleH;
             skipTransition(loop[j - 1]);
-            auto &place1 = parent->_places[p1];
-            auto &place2 = parent->_places[p2];
+            auto &place1 = reducer->parent->_places[p1];
+            auto &place2 = reducer->parent->_places[p2];
 
             {
 
                 for (auto p2it : place2.consumers) {
-                    auto &t = parent->_transitions[p2it];
-                    auto arc = getInArc(p2, t);
+                    auto &t = reducer->parent->_transitions[p2it];
+                    auto arc = reducer->getInArc(p2, t);
                     assert(arc != t.pre.end());
                     assert(arc->place == p2);
                     auto a = *arc;
@@ -90,7 +90,7 @@ namespace PetriEngine {
                     } else {
                         dest->weight += a.weight;
                     }
-                    consistent();
+                    reducer->consistent();
                 }
             }
 
@@ -98,8 +98,8 @@ namespace PetriEngine {
                 auto p2it = place2.producers.begin();
 
                 for (; p2it != place2.producers.end(); ++p2it) {
-                    auto &t = parent->_transitions[*p2it];
-                    Arc a = *getOutArc(t, p2);
+                    auto &t = reducer->parent->_transitions[*p2it];
+                    Arc a = *reducer->getOutArc(t, p2);
                     a.place = p1;
                     auto dest = std::lower_bound(t.post.begin(), t.post.end(), a);
                     if (dest == t.post.end() || dest->place != p1) {
@@ -109,10 +109,10 @@ namespace PetriEngine {
                     } else {
                         dest->weight += a.weight;
                     }
-                    consistent();
+                    reducer->consistent();
                 }
             }
-            parent->initialMarking[p1] += parent->initialMarking[p2];
+            reducer->parent->initialMarking[p1] += reducer->parent->initialMarking[p2];
             skipPlace(p2);
             assert(placeInQuery[p2] == 0);
         }
@@ -120,15 +120,15 @@ namespace PetriEngine {
       };
 
       bool continueReductions = false;
-      for (uint32_t t = 0; t < parent->numberOfTransitions(); ++t) {
-          if (hasTimedout())
+      for (uint32_t t = 0; t < reducer->parent->numberOfTransitions(); ++t) {
+          if (reducer->hasTimedout())
               return continueReductions;
-          _tflags.resize(parent->_transitions.size(), 0);
+          _tflags.resize(reducer->parent->_transitions.size(), 0);
           std::fill(_tflags.begin(), _tflags.end(), 0);
           std::vector<uint32_t> stack;
           {
               if (_tflags[t] != 0) continue;
-              auto &trans = parent->_transitions[t];
+              auto &trans = reducer->parent->_transitions[t];
               if (trans.skip) continue;
               _tflags[t] = transok(t);
               if (_tflags[t] != 1) continue;
@@ -136,15 +136,15 @@ namespace PetriEngine {
           }
           bool outer = true;
           while (!stack.empty() && outer) {
-              if (hasTimedout())
+              if (reducer->hasTimedout())
                   return continueReductions;
               auto it = stack.back();
-              auto post = parent->_transitions[it].post[0].place;
+              auto post = reducer->parent->_transitions[it].post[0].place;
               bool found = false;
-              for (auto &nt : parent->_places[post].consumers) {
-                  if (hasTimedout())
+              for (auto &nt : reducer->parent->_places[post].consumers) {
+                  if (reducer->hasTimedout())
                       return continueReductions;
-                  auto &nexttrans = parent->_transitions[nt];
+                  auto &nexttrans = reducer->parent->_transitions[nt];
                   if (nt == it || nexttrans.skip)
                       continue; // handled elsewhere
                   if (_tflags[nt] == 1 && stack.size() > 1) {

@@ -11,20 +11,10 @@
 namespace PetriEngine {
   class ReductionRuleH : public ReductionRule {
     public:
-      ReductionRuleH(
-          PetriNetBuilder *parent,
-          std::chrono::high_resolution_clock::time_point *timer,
-          int timeout,
-          bool reconstructTrace,
-          std::vector<uint32_t> &skipped_trans,
-          size_t *_removedTransitions,
-          size_t *_removedPlaces
-      ) : ReductionRule(parent, timer, timeout, skipped_trans, _removedTransitions, _removedPlaces),
-          reconstructTrace(reconstructTrace) {};
+      explicit ReductionRuleH(Reducer *reducer) : ReductionRule(reducer) {};
 
       bool reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) override;
     private:
-      bool reconstructTrace;
       std::vector<uint8_t> _tflags;
   };
 }

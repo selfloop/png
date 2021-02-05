@@ -13,31 +13,31 @@ namespace PetriEngine {
       // Rule C - Places with same input and output-transitions which a modulo each other
       bool continueReductions = false;
 
-      _pflags.resize(parent->_places.size(), 0);
+      _pflags.resize(reducer->parent->_places.size(), 0);
       std::fill(_pflags.begin(), _pflags.end(), 0);
 
-      for (uint32_t touter = 0; touter < parent->numberOfTransitions(); ++touter)
-          for (size_t outer = 0; outer < parent->_transitions[touter].post.size(); ++outer) {
-              auto pouter = parent->_transitions[touter].post[outer].place;
+      for (uint32_t touter = 0; touter < reducer->parent->numberOfTransitions(); ++touter)
+          for (size_t outer = 0; outer < reducer->parent->_transitions[touter].post.size(); ++outer) {
+              auto pouter = reducer->parent->_transitions[touter].post[outer].place;
               if (_pflags[pouter] > 0) continue;
               _pflags[pouter] = 1;
-              if (hasTimedout()) return false;
-              if (parent->_places[pouter].skip) continue;
+              if (reducer->hasTimedout()) return false;
+              if (reducer->parent->_places[pouter].skip) continue;
 
               // C4. No inhib
-              if (parent->_places[pouter].inhib) continue;
+              if (reducer->parent->_places[pouter].inhib) continue;
 
-              for (size_t inner = outer + 1; inner < parent->_transitions[touter].post.size(); ++inner) {
-                  auto pinner = parent->_transitions[touter].post[inner].place;
-                  if (parent->_places[pinner].skip) continue;
+              for (size_t inner = outer + 1; inner < reducer->parent->_transitions[touter].post.size(); ++inner) {
+                  auto pinner = reducer->parent->_transitions[touter].post[inner].place;
+                  if (reducer->parent->_places[pinner].skip) continue;
 
                   // C4. No inhib
-                  if (parent->_places[pinner].inhib) continue;
+                  if (reducer->parent->_places[pinner].inhib) continue;
 
                   for (size_t swp = 0; swp < 2; ++swp) {
-                      if (hasTimedout()) return false;
-                      if (parent->_places[pinner].skip ||
-                          parent->_places[pouter].skip)
+                      if (reducer->hasTimedout()) return false;
+                      if (reducer->parent->_places[pinner].skip ||
+                          reducer->parent->_places[pouter].skip)
                           break;
 
                       uint p1 = pouter;
@@ -45,7 +45,7 @@ namespace PetriEngine {
 
                       if (swp == 1) std::swap(p1, p2);
 
-                      Place &place1 = parent->_places[p1];
+                      Place &place1 = reducer->parent->_places[p1];
 
                       // C1. Not same place
                       if (p1 == p2) break;
@@ -54,7 +54,7 @@ namespace PetriEngine {
                       if (placeInQuery[p2] > 0)
                           continue;
 
-                      Place &place2 = parent->_places[p2];
+                      Place &place2 = reducer->parent->_places[p2];
 
                       // C2, C3. Consumer and producer-sets must match
                       if (place1.consumers.size() < place2.consumers.size() ||
@@ -74,8 +74,8 @@ namespace PetriEngine {
                           }
 
                           Transition &trans = getTransition(place1.consumers[j]);
-                          auto a1 = getInArc(p1, trans);
-                          auto a2 = getInArc(p2, trans);
+                          auto a1 = reducer->getInArc(p1, trans);
+                          auto a2 = reducer->getInArc(p2, trans);
                           assert(a1 != trans.pre.end());
                           assert(a2 != trans.pre.end());
                           mult = std::max(mult, ((long double) a2->weight) / ((long double) a1->weight));
@@ -85,8 +85,8 @@ namespace PetriEngine {
 
                       // C6. We do not care about excess markings in p2.
                       if (mult != std::numeric_limits<long double>::max() &&
-                          (((long double) parent->initialMarking[p1]) * mult)
-                              > ((long double) parent->initialMarking[p2])) {
+                          (((long double) reducer->parent->initialMarking[p1]) * mult)
+                              > ((long double) reducer->parent->initialMarking[p2])) {
                           continue;
                       }
 
@@ -101,8 +101,8 @@ namespace PetriEngine {
                           }
 
                           Transition &trans = getTransition(place1.producers[i]);
-                          auto a1 = getOutArc(trans, p1);
-                          auto a2 = getOutArc(trans, p2);
+                          auto a1 = reducer->getOutArc(trans, p1);
+                          auto a2 = reducer->getOutArc(trans, p2);
                           assert(a1 != trans.post.end());
                           assert(a2 != trans.post.end());
 
@@ -115,13 +115,13 @@ namespace PetriEngine {
                       if (ok == 2) break;
                       else if (ok == 1) continue;
 
-                      parent->initialMarking[p2] = 0;
+                      reducer->parent->initialMarking[p2] = 0;
 
-                      if (reconstructTrace) {
+                      if (reducer->reconstructTrace) {
                           for (auto t : place2.consumers) {
                               std::string tname = getTransitionName(t);
-                              const ArcIter arc = getInArc(p2, getTransition(t));
-                              _extraconsume[tname].emplace_back(getPlaceName(p2), arc->weight);
+                              const ArcIter arc = reducer->getInArc(p2, getTransition(t));
+                              reducer->_extraconsume[tname].emplace_back(reducer->getPlaceName(p2), arc->weight);
                           }
                       }
 
@@ -134,7 +134,7 @@ namespace PetriEngine {
                   }
               }
           }
-      assert(consistent());
+      assert(reducer->consistent());
       return continueReductions;
   }
 }

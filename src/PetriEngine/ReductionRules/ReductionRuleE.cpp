@@ -11,10 +11,10 @@
 namespace PetriEngine {
   bool ReductionRuleE::reduce(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
       bool continueReductions = false;
-      const size_t numberofplaces = parent->numberOfPlaces();
+      const size_t numberofplaces = reducer->parent->numberOfPlaces();
       for (uint32_t p = 0; p < numberofplaces; ++p) {
-          if (hasTimedout()) return false;
-          Place &place = parent->_places[p];
+          if (reducer->hasTimedout()) return false;
+          Place &place = reducer->parent->_places[p];
           if (place.skip) continue;
           if (place.inhib) continue;
           if (place.producers.size() > place.consumers.size()) continue;
@@ -23,9 +23,9 @@ namespace PetriEngine {
           bool ok = true;
           for (uint cons : place.consumers) {
               Transition &t = getTransition(cons);
-              auto in = getInArc(p, t);
-              if (in->weight <= parent->initialMarking[p]) {
-                  auto out = getOutArc(t, p);
+              auto in = reducer->getInArc(p, t);
+              if (in->weight <= reducer->parent->initialMarking[p]) {
+                  auto out = reducer->getOutArc(t, p);
                   if (out == t.post.end() || out->place != p || out->weight >= in->weight) {
                       ok = false;
                       break;
@@ -45,7 +45,7 @@ namespace PetriEngine {
               // check that producing arcs originate from transition also
               // consuming. If so, we know it will never fire.
               Transition &t = getTransition(prod);
-              ArcIter it = getInArc(p, t);
+              ArcIter it = reducer->getInArc(p, t);
               if (it == t.pre.end()) {
                   ok = false;
                   break;
@@ -58,7 +58,7 @@ namespace PetriEngine {
           continueReductions = true;
 
           if (placeInQuery[p] == 0)
-              parent->initialMarking[p] = 0;
+              reducer->parent->initialMarking[p] = 0;
 
           bool skipplace = (notenabled.size() == place.consumers.size()) && (placeInQuery[p] == 0);
           for (uint cons : notenabled)
@@ -68,7 +68,7 @@ namespace PetriEngine {
               skipPlace(p);
 
       }
-      assert(consistent());
+      assert(reducer->consistent());
       return continueReductions;
   }
 }

@@ -67,7 +67,7 @@ namespace PetriEngine {
       }
   }
 
-  std::string Reducer::getPlaceName(uint32_t place) {
+  std::string Reducer::getPlaceName(uint32_t place) const {
       for (auto t : parent->_placenames) {
           if (t.second == place) return t.first;
       }
@@ -97,7 +97,7 @@ namespace PetriEngine {
       }
   }
 
-  bool Reducer::consistent() {
+  bool Reducer::consistent() const {
 #ifndef NDEBUG
       size_t strans = 0;
       for (size_t i = 0; i < parent->numberOfTransitions(); ++i) {
@@ -152,127 +152,43 @@ namespace PetriEngine {
   }
 
   bool Reducer::ReducebyRuleA(uint32_t *placeInQuery) {
-      return ReductionRuleA(
-          parent,
-          &_timer,
-          _timeout,
-          reconstructTrace,
-          _initfire,
-          _postfire,
-          _extraconsume,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, false, false);
+      return ReductionRuleA(this).reduce(placeInQuery, false, false);
   }
 
   bool Reducer::ReducebyRuleB(uint32_t *placeInQuery, bool remove_deadlocks, bool remove_consumers) {
-      return ReductionRuleB(
-          parent,
-          &_timer,
-          _timeout,
-          reconstructTrace,
-          _initfire,
-          _postfire,
-          _extraconsume,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, remove_deadlocks, remove_consumers);
+      return ReductionRuleB(this).reduce(placeInQuery, remove_deadlocks, remove_consumers);
   }
 
   bool Reducer::ReducebyRuleC(uint32_t *placeInQuery) {
-      return ReductionRuleC(
-          parent,
-          &_timer,
-          _timeout,
-          reconstructTrace,
-          _extraconsume,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, false, false);
+      return ReductionRuleC(this).reduce(placeInQuery, false, false);
   }
 
   bool Reducer::ReducebyRuleD(uint32_t *placeInQuery) {
-      return ReductionRuleD(
-          parent,
-          &_timer,
-          _timeout,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, false, false);
+      return ReductionRuleD(this).reduce(placeInQuery, false, false);
   }
 
   bool Reducer::ReducebyRuleE(uint32_t *placeInQuery) {
-      return ReductionRuleE(
-          parent,
-          &_timer,
-          _timeout,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, false, false);
+      return ReductionRuleE(this).reduce(placeInQuery, false, false);
   }
 
   bool Reducer::ReducebyRuleF(uint32_t *placeInQuery) {
-      return ReductionRuleF(
-          parent,
-          &_timer,
-          _timeout,
-          reconstructTrace,
-          _extraconsume,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, false, false);
+      return ReductionRuleF(this).reduce(placeInQuery, false, false);
   }
 
   bool Reducer::ReducebyRuleG(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
-      return ReductionRuleG(
-          parent,
-          &_timer,
-          _timeout,
-          reconstructTrace,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, remove_loops, remove_consumers);
+      return ReductionRuleG(this).reduce(placeInQuery, remove_loops, remove_consumers);
   }
 
   bool Reducer::ReducebyRuleH(uint32_t *placeInQuery) {
-      return ReductionRuleH(
-          parent,
-          &_timer,
-          _timeout,
-          reconstructTrace,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, false, false);
+      return ReductionRuleH(this).reduce(placeInQuery, false, false);
   }
 
   bool Reducer::ReducebyRuleI(uint32_t *placeInQuery, bool remove_loops, bool remove_consumers) {
-      return ReductionRuleI(
-          parent,
-          &_timer,
-          _timeout,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, remove_loops, remove_consumers);
+      return ReductionRuleI(this).reduce(placeInQuery, remove_loops, remove_consumers);
   }
 
   bool Reducer::ReducebyRuleJ(uint32_t *placeInQuery) {
-      return ReductionRuleJ(
-          parent,
-          &_timer,
-          _timeout,
-          _skipped_trans,
-          &_removedTransitions,
-          &_removedPlaces
-      ).reduce(placeInQuery, false, false);
+      return ReductionRuleJ(this).reduce(placeInQuery, false, false);
   }
 
   void Reducer::Reduce(QueryPlaceAnalysisContext &context,
@@ -283,7 +199,7 @@ namespace PetriEngine {
                        bool remove_consumers,
                        bool next_safe,
                        std::vector<uint32_t> &reduction) {
-      this->_timeout = timeout;
+      _timeout = timeout;
       _timer = std::chrono::high_resolution_clock::now();
       assert(consistent());
       this->reconstructTrace = reconstructTrace;
