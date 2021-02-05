@@ -147,8 +147,7 @@ namespace PetriEngine {
         void eraseTransition(std::vector<uint32_t>&, uint32_t);
         void skipTransition(uint32_t);
         void skipPlace(uint32_t);
-        std::string newTransName();
-        
+
         bool consistent();
         bool hasTimedout() const {
             auto end = std::chrono::high_resolution_clock::now();
@@ -160,7 +159,6 @@ namespace PetriEngine {
         std::unordered_map<std::string, std::vector<std::string>> _postfire;
         std::unordered_map<std::string, std::vector<ExpandedArc>> _extraconsume;
         std::vector<uint8_t> _tflags;
-        size_t _tnameid = 0;
         std::vector<uint32_t> _skipped_trans;
     };
 }
